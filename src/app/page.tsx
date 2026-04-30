@@ -62,7 +62,7 @@ export default function Home() {
           address: CONTRACT_ADDRESS,
           abi: ESCROW_ABI,
           functionName: 'createEscrow',
-          args: [recipient, parsedAmount, BigInt(timeLock)],
+          args: [recipient as `0x${string}`, parsedAmount, BigInt(timeLock)],
         })
         
         setStatusMsg('Payment successful!')
@@ -74,7 +74,7 @@ export default function Home() {
           address: USDC_ADDRESS,
           abi: USDC_ABI,
           functionName: 'transfer',
-          args: [recipient, parsedAmount],
+          args: [recipient as `0x${string}`, parsedAmount],
         })
         
         setStatusMsg('Payment successful!')

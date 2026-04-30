@@ -39,6 +39,6 @@ export const ESCROW_ABI = [
   }
 ] as const;
 
-export const CONTRACT_ADDRESS = '0x1df8a5f2484fc168ab6aa5345f8ebda7201106bc';
-export const USDC_ADDRESS = '0x765DE816845861e75A25fCA122bb6898B8B1282a';
-export const TREASURY_ADDRESS = '0x6a83a5eb5cf378b65ec20047eac937d5ba09aa5b';
+export const CONTRACT_ADDRESS: `0x${string}` = '0x1df8a5f2484fc168ab6aa5345f8ebda7201106bc';
+export const USDC_ADDRESS: `0x${string}` = '0x765DE816845861e75A25fCA122bb6898B8B1282a';
+export const TREASURY_ADDRESS: `0x${string}` = '0x6a83a5eb5cf378b65ec20047eac937d5ba09aa5b';
