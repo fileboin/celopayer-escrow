@@ -2,24 +2,28 @@
 
 import { useState } from 'react'
 import { HowItWorks } from '@/components/HowItWorks'
-import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2 } from 'lucide-react'
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2 } from 'lucide-react'
+import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { injected } from 'wagmi/connectors'
 import { QRCodeSVG } from 'qrcode.react'
+import { parseUnits } from 'viem'
+import { USDC_ABI, ESCROW_ABI, CONTRACT_ADDRESS, USDC_ADDRESS } from '@/lib/abi'
 
 export default function Home() {
   const [mode, setMode] = useState<'escrow' | 'instant'>('escrow')
+  const [recipient, setRecipient] = useState('')
   const [amount, setAmount] = useState('')
+  const [timeLock, setTimeLock] = useState('3600')
   const [copied, setCopied] = useState(false)
+  const [statusMsg, setStatusMsg] = useState('')
   
   const { address, isConnected } = useAccount()
   const { connect } = useConnect()
   const { disconnect } = useDisconnect()
+  const { writeContractAsync, isPending } = useWriteContract()
 
   const handleCopy = () => {
-    // In a real scenario we might copy the contract address if in Escrow mode
-    // For now we just copy the connected address or a placeholder
-    navigator.clipboard.writeText(address || '0x...')
+    navigator.clipboard.writeText(CONTRACT_ADDRESS)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -28,6 +32,60 @@ export default function Home() {
   const numAmount = parseFloat(amount) || 0
   const fee = mode === 'escrow' ? numAmount * 0.005 : 0
   const total = numAmount + fee
+
+  const handlePayment = async () => {
+    if (!recipient || numAmount <= 0) {
+      alert("Please enter a valid recipient address and amount.")
+      return
+    }
+
+    try {
+      setStatusMsg('Initiating transaction...')
+      
+      const usdcDecimals = 6 // Native Celo USDC has 6 decimals
+      const parsedAmount = parseUnits(numAmount.toString(), usdcDecimals)
+      
+      if (mode === 'escrow') {
+        // Escrow Mode: 1. Approve Contract to spend total (amount + fee), 2. Call createEscrow
+        const totalWithFee = parseUnits(total.toString(), usdcDecimals)
+        
+        setStatusMsg('Approving USDC...')
+        const approveHash = await writeContractAsync({
+          address: USDC_ADDRESS,
+          abi: USDC_ABI,
+          functionName: 'approve',
+          args: [CONTRACT_ADDRESS, totalWithFee],
+        })
+        
+        setStatusMsg('Creating Escrow...')
+        const escrowHash = await writeContractAsync({
+          address: CONTRACT_ADDRESS,
+          abi: ESCROW_ABI,
+          functionName: 'createEscrow',
+          args: [recipient, parsedAmount, BigInt(timeLock)],
+        })
+        
+        setStatusMsg('Payment successful!')
+        alert('Escrow created successfully! TX: ' + escrowHash)
+      } else {
+        // Instant Mode: Direct USDC transfer
+        setStatusMsg('Transferring USDC...')
+        const transferHash = await writeContractAsync({
+          address: USDC_ADDRESS,
+          abi: USDC_ABI,
+          functionName: 'transfer',
+          args: [recipient, parsedAmount],
+        })
+        
+        setStatusMsg('Payment successful!')
+        alert('Instant transfer successful! TX: ' + transferHash)
+      }
+    } catch (error: any) {
+      console.error(error)
+      setStatusMsg('')
+      alert('Transaction failed: ' + (error.shortMessage || error.message))
+    }
+  }
 
   return (
     <main className="flex-1 p-4 md:p-8 max-w-md mx-auto w-full">
@@ -80,6 +138,20 @@ export default function Home() {
 
       {/* Payment Form */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mb-6">
+        
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            {mode === 'escrow' ? 'Seller Address' : 'Recipient Address'}
+          </label>
+          <input 
+            type="text"
+            value={recipient}
+            onChange={(e) => setRecipient(e.target.value)}
+            className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 px-4 font-medium outline-none focus:border-[var(--celo-green)] focus:ring-2 focus:ring-[var(--celo-green)]/20 transition-all text-sm"
+            placeholder="0x..."
+          />
+        </div>
+
         <label className="block text-sm font-medium text-gray-700 mb-2">Amount (USDC)</label>
         <div className="relative mb-6">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
@@ -95,7 +167,11 @@ export default function Home() {
         {mode === 'escrow' && (
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">Time-Lock</label>
-            <select className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 px-4 font-medium outline-none focus:border-[var(--celo-green)]">
+            <select 
+              value={timeLock}
+              onChange={(e) => setTimeLock(e.target.value)}
+              className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3 px-4 font-medium outline-none focus:border-[var(--celo-green)]"
+            >
               <option value="3600">1 Hour</option>
               <option value="86400">24 Hours</option>
               <option value="259200">3 Days</option>
@@ -121,18 +197,30 @@ export default function Home() {
         </div>
 
         <button 
-          className="w-full bg-[var(--celo-green)] hover:bg-[var(--celo-green-dark)] text-white font-bold text-lg py-4 rounded-2xl shadow-lg shadow-[var(--celo-green)]/30 active:scale-95 transition-all flex items-center justify-center gap-2"
+          onClick={handlePayment}
+          disabled={!isConnected || isPending}
+          className="w-full bg-[var(--celo-green)] hover:bg-[var(--celo-green-dark)] disabled:bg-gray-300 disabled:shadow-none text-white font-bold text-lg py-4 rounded-2xl shadow-lg shadow-[var(--celo-green)]/30 active:scale-95 transition-all flex items-center justify-center gap-2"
         >
-          Pay with MiniPay
+          {isPending ? (
+            <><Loader2 className="animate-spin" size={20} /> Processing...</>
+          ) : (
+            'Pay with MiniPay'
+          )}
         </button>
+        {statusMsg && <p className="text-center text-sm font-medium mt-3 text-gray-500">{statusMsg}</p>}
       </div>
 
       {/* QR & Copy Section */}
       {total > 0 && (
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col items-center mb-6">
-          <h3 className="text-sm font-medium text-gray-500 mb-4">Or pay via QR Code</h3>
+          <h3 className="text-sm font-medium text-gray-500 mb-4">
+            {mode === 'escrow' ? 'Escrow Contract Address' : 'Recipient Address'}
+          </h3>
           <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm mb-4">
-            <QRCodeSVG value={`celo:${address || '0xPlaceholder'}?amount=${total}`} size={160} />
+            <QRCodeSVG 
+              value={`celo:${mode === 'escrow' ? CONTRACT_ADDRESS : (recipient || '0x')}?amount=${total}`} 
+              size={160} 
+            />
           </div>
           
           <button 
@@ -140,7 +228,7 @@ export default function Home() {
             className="flex items-center gap-2 text-sm font-medium text-gray-600 bg-gray-100 py-2 px-4 rounded-full hover:bg-gray-200 transition-colors"
           >
             {copied ? <CheckCircle2 size={16} className="text-[var(--celo-green-dark)]" /> : <Copy size={16} />}
-            {copied ? 'Copied!' : 'Copy Address & Amount'}
+            {copied ? 'Copied!' : 'Copy Contract Address'}
           </button>
         </div>
       )}
