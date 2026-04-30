@@ -3,11 +3,17 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --celo-yellow: #FBCC5C;
+  --celo-green: #35D07F;
+  --celo-yellow-light: #FCE196;
+  --celo-green-dark: #2AAB66;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-celo-yellow: var(--celo-yellow);
+  --color-celo-green: var(--celo-green);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -22,5 +28,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
