@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { InstallPWA } from '@/components/InstallPWA'
 import { HowItWorks } from '@/components/HowItWorks'
 import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2, QrCode } from 'lucide-react'
 import Confetti from 'react-confetti'
@@ -164,34 +165,37 @@ export default function Home() {
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-md">
         {/* Header */}
-        <header className="flex justify-between items-center mb-6 w-full">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Celopayer</h1>
-          {isConnected ? (
-            <button 
-              onClick={() => disconnect()}
-              className="text-sm font-semibold px-4 py-2 rounded-xl bg-white text-gray-700 border border-gray-200 shadow-sm hover:bg-gray-50 transition-all"
-            >
-              {address?.slice(0, 6)}...{address?.slice(-4)}
-            </button>
-          ) : (
-            <button 
-              onClick={() => connect({ connector: injected() })}
-              className="px-5 py-2.5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-50 transition-all border border-gray-200 shadow-sm flex items-center gap-2"
-            >
-              <Wallet size={18} />
-              Connect
-            </button>
-          )}
+        <header className="flex justify-between items-center mb-8 w-full">
+          <h1 className="text-3xl font-black tracking-tight text-black">Celopayer</h1>
+          <div className="flex items-center gap-2">
+            <InstallPWA />
+            {isConnected ? (
+              <button 
+                onClick={() => disconnect()}
+                className="text-sm font-bold px-4 py-2 rounded-full bg-white text-black border border-gray-200 shadow-sm hover:bg-gray-50 transition-all"
+              >
+                {address?.slice(0, 6)}...{address?.slice(-4)}
+              </button>
+            ) : (
+              <button 
+                onClick={() => connect({ connector: injected() })}
+                className="px-5 py-2.5 bg-black text-white font-bold rounded-full hover:bg-gray-800 transition-all shadow-md flex items-center gap-2 text-sm"
+              >
+                <Wallet size={16} />
+                Connect
+              </button>
+            )}
+          </div>
         </header>
 
         {/* Mode Switcher */}
-        <div className="flex bg-gray-100/80 p-1.5 rounded-xl mb-6 shadow-inner">
+        <div className="flex bg-gray-100 p-1 rounded-full mb-6">
           <button
             onClick={() => setMode('escrow')}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg flex justify-center items-center gap-2 transition-all ${
+            className={`flex-1 py-3 text-sm font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
               mode === 'escrow' 
-                ? 'bg-white text-celo-green shadow-sm' 
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-black text-white shadow-md' 
+                : 'text-gray-500 hover:text-black'
             }`}
           >
             <ShieldAlert size={18} />
@@ -199,10 +203,10 @@ export default function Home() {
           </button>
           <button
             onClick={() => setMode('instant')}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg flex justify-center items-center gap-2 transition-all ${
+            className={`flex-1 py-3 text-sm font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
               mode === 'instant' 
-                ? 'bg-white text-celo-green shadow-sm' 
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-black text-white shadow-md' 
+                : 'text-gray-500 hover:text-black'
             }`}
           >
             <Zap size={18} />
@@ -212,13 +216,13 @@ export default function Home() {
 
         {/* Payment Method Switcher (Only for Instant Mode) */}
         {mode === 'instant' && (
-          <div className="flex bg-gray-100/80 p-1.5 rounded-xl mb-6 shadow-inner">
+          <div className="flex bg-gray-100 p-1 rounded-full mb-6">
             <button
               onClick={() => setPaymentMethod('wallet')}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg flex justify-center items-center gap-2 transition-all ${
+              className={`flex-1 py-2.5 text-xs font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
                 paymentMethod === 'wallet' 
-                  ? 'bg-white text-celo-green shadow-sm' 
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-black text-white shadow-md' 
+                  : 'text-gray-500 hover:text-black'
               }`}
             >
               <Wallet size={16} />
@@ -226,10 +230,10 @@ export default function Home() {
             </button>
             <button
               onClick={() => setPaymentMethod('qr')}
-              className={`flex-1 py-2 text-sm font-semibold rounded-lg flex justify-center items-center gap-2 transition-all ${
+              className={`flex-1 py-2.5 text-xs font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
                 paymentMethod === 'qr' 
-                  ? 'bg-white text-celo-green shadow-sm' 
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-black text-white shadow-md' 
+                  : 'text-gray-500 hover:text-black'
               }`}
             >
               <QrCode size={16} />
@@ -239,7 +243,7 @@ export default function Home() {
         )}
 
         {/* Payment Form */}
-        <div className="bg-white rounded-3xl shadow-lg shadow-gray-200/50 border border-gray-100 p-6 sm:p-8 mb-6">
+        <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/40 border border-gray-100 p-6 sm:p-8 mb-6">
           
           <div className="mb-5">
             <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
@@ -324,7 +328,7 @@ export default function Home() {
               <button 
                 onClick={handlePayment}
                 disabled={!isConnected || isPending}
-                className="w-full p-4 bg-celo-green text-white font-bold rounded-xl hover:bg-[#2AAB66] transition-all shadow-md shadow-celo-green/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full p-4 bg-black text-white font-bold rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isPending ? (
                   <><Loader2 className="animate-spin text-white" size={24} /> Obrađuje se...</>
@@ -332,7 +336,7 @@ export default function Home() {
                   'Plati sa MiniPay / Web3'
                 )}
               </button>
-              {statusMsg && <p className="text-center font-semibold mt-4 text-celo-green text-sm">{statusMsg}</p>}
+              {statusMsg && <p className="text-center font-bold mt-4 text-black text-sm">{statusMsg}</p>}
             </>
           )}
         </div>
