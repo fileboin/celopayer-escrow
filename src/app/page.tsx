@@ -35,8 +35,9 @@ export default function Home() {
   const total = numAmount + fee
 
   const handlePayment = async () => {
-    if (!recipient || !isAddress(recipient)) {
-      alert("Neispravna wallet adresa! Molim vas unesite validnu adresu koja počinje sa 0x.")
+    const cleanRecipient = recipient.trim()
+    if (!cleanRecipient || !/^0x[a-fA-F0-9]{40}$/.test(cleanRecipient)) {
+      alert("Neispravna wallet adresa! Molim vas unesite validnu adresu koja počinje sa 0x i ima 42 karaktera.")
       return
     }
     if (numAmount <= 0) {
@@ -74,7 +75,7 @@ export default function Home() {
           address: CONTRACT_ADDRESS,
           abi: ESCROW_ABI,
           functionName: 'createEscrow',
-          args: [recipient as `0x${string}`, parsedAmount, BigInt(timeLock)],
+          args: [cleanRecipient as `0x${string}`, parsedAmount, BigInt(timeLock)],
         })
         
         setStatusMsg('Waiting for escrow confirmation...')
@@ -93,7 +94,7 @@ export default function Home() {
           address: USDC_ADDRESS,
           abi: USDC_ABI,
           functionName: 'transfer',
-          args: [recipient as `0x${string}`, parsedAmount],
+          args: [cleanRecipient as `0x${string}`, parsedAmount],
         })
         
         setStatusMsg('Waiting for transfer confirmation...')
