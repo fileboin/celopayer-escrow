@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { HowItWorks } from '@/components/HowItWorks'
 import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2 } from 'lucide-react'
 import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClient } from 'wagmi'
@@ -16,6 +16,11 @@ export default function Home() {
   const [timeLock, setTimeLock] = useState('3600')
   const [copied, setCopied] = useState(false)
   const [statusMsg, setStatusMsg] = useState('')
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   
   const { address, isConnected } = useAccount()
   const { connect } = useConnect()
@@ -113,6 +118,8 @@ export default function Home() {
       alert('Transaction failed: ' + (error.shortMessage || error.message))
     }
   }
+
+  if (!mounted) return null
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-8">
