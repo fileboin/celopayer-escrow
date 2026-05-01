@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { InstallPWA } from '@/components/InstallPWA'
 import { HowItWorks } from '@/components/HowItWorks'
-import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2, Moon, Sun, Globe, QrCode } from 'lucide-react'
+import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2, Moon, Sun, Globe, QrCode, Share2, Send, MessageCircle, Mail } from 'lucide-react'
 import Confetti from 'react-confetti'
 import { useWindowSize } from 'react-use'
 import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClient } from 'wagmi'
@@ -15,6 +16,15 @@ import { translations, Language } from '@/lib/i18n'
 import { useTheme } from 'next-themes'
 
 export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-celo-green" /></div>}>
+      <PaymentApp />
+    </Suspense>
+  )
+}
+
+function PaymentApp() {
+  const searchParams = useSearchParams()
   const [mode, setMode] = useState<'escrow' | 'instant'>('escrow')
   const [recipient, setRecipient] = useState('')
   const [amount, setAmount] = useState('')
@@ -35,7 +45,16 @@ export default function Home() {
   
   useEffect(() => {
     setMounted(true)
-  }, [])
+    
+    // Handle query params for deep linking
+    const toParam = searchParams.get('to')
+    const amountParam = searchParams.get('amount')
+    const modeParam = searchParams.get('mode')
+    
+    if (toParam) setRecipient(toParam)
+    if (amountParam) setAmount(amountParam)
+    if (modeParam === 'instant' || modeParam === 'escrow') setMode(modeParam as any)
+  }, [searchParams])
   
   const { address, isConnected } = useAccount()
   const { connect, connectors } = useConnect()
@@ -150,6 +169,37 @@ export default function Home() {
       
       setErrorMsg(t.txFailed + errMsg)
     }
+  }
+
+  const getShareUrl = () => {
+    if (typeof window === 'undefined') return ''
+    const baseUrl = window.location.origin
+    const params = new URLSearchParams()
+    if (recipient) params.set('to', recipient)
+    if (amount) params.set('amount', amount)
+    params.set('mode', mode)
+    return `${baseUrl}/?${params.toString()}`
+  }
+
+  const shareVia = (platform: string) => {
+    const url = getShareUrl()
+    const text = mode === 'escrow' 
+      ? `Plati mi sigurno preko Celopayer Escrow-a: ${url}`
+      : `Pošalji mi uplatu preko Celopayer-a: ${url}`
+    
+    let shareLink = ''
+    switch (platform) {
+      case 'whatsapp': shareLink = `https://wa.me/?text=${encodeURIComponent(text)}`; break
+      case 'telegram': shareLink = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`; break
+      case 'viber': shareLink = `viber://forward?text=${encodeURIComponent(text)}`; break
+      case 'mail': shareLink = `mailto:?subject=Zahtev za uplatu&body=${encodeURIComponent(text)}`; break
+      default:
+        if (navigator.share) {
+          navigator.share({ title: 'Celopayer Request', text, url })
+          return
+        }
+    }
+    if (shareLink) window.open(shareLink, '_blank')
   }
 
   if (!mounted) return null
@@ -414,6 +464,51 @@ export default function Home() {
               {copied ? <CheckCircle2 size={16} className="text-celo-green" /> : <Copy size={16} />}
               {copied ? t.copied : t.copyAddress}
             </button>
+
+            {/* Sharing Menu */}
+            <div className="mt-6 w-full">
+              <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 text-center">Share Request</p>
+              <div className="grid grid-cols-4 gap-3">
+                <button 
+                  onClick={() => shareVia('whatsapp')}
+                  className="flex flex-col items-center gap-2 p-3 bg-green-50 dark:bg-green-900/10 rounded-2xl hover:scale-105 transition-transform"
+                  title="WhatsApp"
+                >
+                  <MessageCircle size={24} className="text-[#25D366]" />
+                  <span className="text-[10px] font-bold text-gray-500">WhatsApp</span>
+                </button>
+                <button 
+                  onClick={() => shareVia('telegram')}
+                  className="flex flex-col items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-2xl hover:scale-105 transition-transform"
+                  title="Telegram"
+                >
+                  <Send size={24} className="text-[#0088cc]" />
+                  <span className="text-[10px] font-bold text-gray-500">Telegram</span>
+                </button>
+                <button 
+                  onClick={() => shareVia('viber')}
+                  className="flex flex-col items-center gap-2 p-3 bg-purple-50 dark:bg-purple-900/10 rounded-2xl hover:scale-105 transition-transform"
+                  title="Viber"
+                >
+                  <MessageCircle size={24} className="text-[#7360f2]" />
+                  <span className="text-[10px] font-bold text-gray-500">Viber</span>
+                </button>
+                <button 
+                  onClick={() => shareVia('mail')}
+                  className="flex flex-col items-center gap-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-2xl hover:scale-105 transition-transform"
+                  title="Email"
+                >
+                  <Mail size={24} className="text-gray-500" />
+                  <span className="text-[10px] font-bold text-gray-500">Email</span>
+                </button>
+              </div>
+              <button 
+                onClick={() => shareVia('native')}
+                className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-gray-900 dark:bg-white text-white dark:text-black rounded-2xl font-bold text-xs hover:opacity-90 transition-opacity"
+              >
+                <Share2 size={14} /> Other Options
+              </button>
+            </div>
           </div>
           
         </div>
