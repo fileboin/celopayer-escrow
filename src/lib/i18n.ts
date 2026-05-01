@@ -60,7 +60,12 @@ export const translations = {
     downloadReceipt: 'Download Receipt',
     noHistory: 'No transaction history yet.',
     address: 'Address',
-    selectToken: 'Select Currency'
+    selectToken: 'Select Currency',
+    nonCustodialNote: 'Celopayer is non-custodial. We do not hold your funds; they are secured by the smart contract on the Celo blockchain.',
+    rateTransaction: 'Rate this transaction',
+    escrowStarted: 'Escrow Started',
+    paymentCompleted: 'Payment Completed',
+    ratingThankYou: 'Thank you for your feedback!'
   },
   sr: {
     title: 'Celopayer',
@@ -123,7 +128,12 @@ export const translations = {
     downloadReceipt: 'Preuzmi račun',
     noHistory: 'Nema istorije transakcija.',
     address: 'Adresa',
-    selectToken: 'Izaberi valutu'
+    selectToken: 'Izaberi valutu',
+    nonCustodialNote: 'Celopayer je non-custodial sistem. Mi ne čuvamo vaš novac; on je osiguran pametnim ugovorom na Celo blokčejnu.',
+    rateTransaction: 'Ocenite transakciju',
+    escrowStarted: 'Escrow Započet',
+    paymentCompleted: 'Uplata Završena',
+    ratingThankYou: 'Hvala na povratnim informacijama!'
   },
   es: {
     title: 'Celopayer',
@@ -186,7 +196,12 @@ export const translations = {
     downloadReceipt: 'Descargar Recibo',
     noHistory: 'No hay historial aún.',
     address: 'Dirección',
-    selectToken: 'Seleccionar Moneda'
+    selectToken: 'Seleccionar Moneda',
+    nonCustodialNote: 'Celopayer es un sistema sin custodia. No retenemos sus fondos; están asegurados por el contrato inteligente en la cadena de bloques Celo.',
+    rateTransaction: 'Calificar esta transacción',
+    escrowStarted: 'Fideicomiso Iniciado',
+    paymentCompleted: 'Pago Completado',
+    ratingThankYou: '¡Gracias por sus comentarios!'
   },
   fr: {
     title: 'Celopayer',
@@ -249,7 +264,12 @@ export const translations = {
     downloadReceipt: 'Télécharger le reçu',
     noHistory: 'Pas d\'historique pour le moment.',
     address: 'Adresse',
-    selectToken: 'Sélectionner la devise'
+    selectToken: 'Sélectionner la devise',
+    nonCustodialNote: 'Celopayer est non-custodial. Nous ne détenons pas vos fonds ; ils sont sécurisés par le contrat intelligent sur la blockchain Celo.',
+    rateTransaction: 'Évaluer cette transaction',
+    escrowStarted: 'Escrow Démarré',
+    paymentCompleted: 'Paiement Terminé',
+    ratingThankYou: 'Merci pour votre avis !'
   }
 }
 

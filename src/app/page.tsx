@@ -49,6 +49,8 @@ function PaymentApp() {
   const [showContacts, setShowContacts] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [newContact, setNewContact] = useState({ name: '', address: '' })
+  const [rating, setRating] = useState(0)
+  const [showRatingThanks, setShowRatingThanks] = useState(false)
   
   const { theme, setTheme } = useTheme()
   const { width, height } = useWindowSize()
@@ -315,16 +317,49 @@ Thank you for using Celopayer!
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-4 sm:p-8 transition-colors">
         <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative overflow-hidden border border-gray-100 dark:border-gray-700">
-          <div className="mx-auto w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 shadow-inner">
-             <span className="text-5xl">🎉</span>
+          <div className="mx-auto w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 shadow-inner animate-bounce">
+             <span className="text-5xl">✅</span>
           </div>
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">{t.paymentSuccess}</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-8 font-medium">{t.successDesc}</p>
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
+            {mode === 'escrow' ? t.escrowStarted : t.paymentCompleted}
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-6 font-medium">{t.successDesc}</p>
+          
+          <div className="mb-8 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-700 text-left">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-[10px] text-gray-400 uppercase font-black">Status</span>
+              <span className="text-[10px] text-celo-green font-black uppercase">Confirmed</span>
+            </div>
+            <p className="text-lg font-black text-gray-900 dark:text-white">
+              {amount} {TOKENS[selectedTokenIndex].symbol}
+            </p>
+            <p className="text-[10px] text-gray-500 font-mono truncate">{recipient}</p>
+          </div>
+
+          {!showRatingThanks ? (
+            <div className="mb-8">
+              <p className="text-xs font-bold text-gray-400 uppercase mb-3">{t.rateTransaction}</p>
+              <div className="flex justify-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button 
+                    key={star} 
+                    onClick={() => { setRating(star); setShowRatingThanks(true) }}
+                    className={`text-2xl transition-transform hover:scale-125 ${rating >= star ? 'grayscale-0' : 'grayscale'}`}
+                  >
+                    ⭐
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="mb-8 text-xs font-bold text-celo-green animate-pulse">{t.ratingThankYou}</p>
+          )}
+
           <a 
             href={`https://celoscan.io/tx/${successTx}`} 
             target="_blank" 
             rel="noreferrer" 
-            className="block w-full py-3.5 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold rounded-xl mb-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="block w-full py-3.5 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold rounded-xl mb-3 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
           >
             {t.viewCeloScan}
           </a>
@@ -333,6 +368,8 @@ Thank you for using Celopayer!
               setSuccessTx(null)
               setAmount('')
               setRecipient('')
+              setShowRatingThanks(false)
+              setRating(0)
             }} 
             className="block w-full py-3.5 px-4 bg-celo-green text-white font-bold rounded-xl hover:bg-[#2AAB66] transition-colors shadow-md shadow-celo-green/20"
           >
@@ -888,6 +925,12 @@ Thank you for using Celopayer!
             Admin Panel
           </a>
         </footer>
+
+        <div className="mt-8 p-4 bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl border border-gray-100 dark:border-gray-700 text-center">
+          <p className="text-[10px] leading-relaxed text-gray-400 font-medium max-w-xs mx-auto">
+            {t.nonCustodialNote}
+          </p>
+        </div>
 
       </div>
     </main>
