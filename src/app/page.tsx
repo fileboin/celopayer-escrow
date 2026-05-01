@@ -106,7 +106,9 @@ function PaymentApp() {
   const fee = mode === 'escrow' ? numAmount * 0.005 : 0
   const total = numAmount + fee
 
-  const handlePayment = async () => {
+  const handlePayment = async (modeOverride?: 'instant' | 'escrow') => {
+    const effectiveMode = modeOverride ?? mode
+    if (modeOverride) setMode(modeOverride)
     setErrorMsg('')
     // Extract the raw 0x address from any pasted string or URI
     const match = recipient.match(/0x[a-fA-F0-9]{40}/i)
@@ -130,7 +132,7 @@ function PaymentApp() {
       
       let txHash = ''
 
-      if (mode === 'escrow') {
+      if (effectiveMode === 'escrow') {
         const totalWithFee = parseUnits(total.toString(), usdcDecimals)
         
         setStatusMsg(t.apprUsdc)
@@ -168,7 +170,7 @@ function PaymentApp() {
         setStatusMsg(t.paymentSuccess)
         setIsConfirming(false)
         setSuccessTx(escrowHash)
-      } else {
+      } else { // instant
         setStatusMsg(t.waitTrans)
         const transferHash = await writeContractAsync({
           address: token.address,
@@ -198,7 +200,7 @@ function PaymentApp() {
         token: token.symbol,
         to: cleanRecipient,
         date: new Date().toISOString(),
-        mode
+        mode: effectiveMode
       }
       setHistory([newTx, ...history])
 
@@ -542,30 +544,54 @@ Thank you for using Celopayer!
 
         {/* Mode Switcher (only for Send mode) */}
         {flow === 'send' && (
-          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-full mb-6">
-            <button
-              onClick={() => setMode('escrow')}
-              className={`flex-1 py-3 text-sm font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
-                mode === 'escrow' 
-                  ? 'bg-black dark:bg-white text-white dark:text-black shadow-md' 
-                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
-              }`}
-            >
-              <ShieldAlert size={18} />
-              {t.escrow}
-            </button>
-            <button
-              onClick={() => setMode('instant')}
-              className={`flex-1 py-3 text-sm font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
-                mode === 'instant' 
-                  ? 'bg-black dark:bg-white text-white dark:text-black shadow-md' 
-                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
-              }`}
-            >
-              <Zap size={18} />
-              {t.instant}
-            </button>
-          </div>
+          <>
+            <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-full mb-4">
+              <button
+                onClick={() => setMode('escrow')}
+                className={`flex-1 py-3 text-sm font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
+                  mode === 'escrow' 
+                    ? 'bg-black dark:bg-white text-white dark:text-black shadow-md' 
+                    : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                }`}
+              >
+                <ShieldAlert size={18} />
+                {t.escrow}
+              </button>
+              <button
+                onClick={() => setMode('instant')}
+                className={`flex-1 py-3 text-sm font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
+                  mode === 'instant' 
+                    ? 'bg-black dark:bg-white text-white dark:text-black shadow-md' 
+                    : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                }`}
+              >
+                <Zap size={18} />
+                {t.instant}
+              </button>
+            </div>
+
+            {/* Pay buttons — prominently placed below the toggle */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <button
+                id="btn-pay-instant"
+                onClick={() => !isConnected ? setShowConnectMenu(true) : handlePayment('instant')}
+                disabled={isPending}
+                className="flex items-center justify-center gap-2 py-4 px-3 bg-[#2AAB66] hover:bg-[#249558] active:scale-95 text-white font-black rounded-2xl shadow-lg shadow-green-500/30 border-b-4 border-[#1e7a48] transition-all text-sm"
+              >
+                <Zap size={18} />
+                {t.payInstant}
+              </button>
+              <button
+                id="btn-pay-escrow"
+                onClick={() => !isConnected ? setShowConnectMenu(true) : handlePayment('escrow')}
+                disabled={isPending}
+                className="flex items-center justify-center gap-2 py-4 px-3 bg-gray-900 dark:bg-white hover:bg-gray-700 dark:hover:bg-gray-100 active:scale-95 text-white dark:text-black font-black rounded-2xl shadow-lg border-b-4 border-gray-700 dark:border-gray-300 transition-all text-sm"
+              >
+                <ShieldAlert size={18} />
+                {t.payEscrow}
+              </button>
+            </div>
+          </>
         )}
 
         {/* Payment Form */}
@@ -713,16 +739,8 @@ Thank you for using Celopayer!
             </div>
           )}
 
-          {/* Secondary Payment Button at the bottom for convenience */}
-          {flow !== 'scheduled' && (
-            <button 
-              onClick={!isConnected ? () => setShowConnectMenu(true) : handlePayment}
-              disabled={isPending}
-              className="w-full p-4 text-gray-400 dark:text-gray-500 font-bold text-sm rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all mb-4"
-            >
-              {t.payWith}
-            </button>
-          )}
+
+
           
           {statusMsg && <p className="text-center font-bold mt-4 text-celo-green text-sm">{statusMsg}</p>}
           {errorMsg && (

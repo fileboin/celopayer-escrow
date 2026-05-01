@@ -68,7 +68,9 @@ export const translations = {
     rateTransaction: 'Rate this transaction',
     escrowStarted: 'Escrow Started',
     paymentCompleted: 'Payment Completed',
-    ratingThankYou: 'Thank you for your feedback!'
+    ratingThankYou: 'Thank you for your feedback!',
+    payInstant: 'Pay Instant',
+    payEscrow: 'Pay Escrow'
   },
   sr: {
     title: 'Celopayer',
@@ -139,7 +141,9 @@ export const translations = {
     rateTransaction: 'Ocenite transakciju',
     escrowStarted: 'Escrow Započet',
     paymentCompleted: 'Uplata Završena',
-    ratingThankYou: 'Hvala na povratnim informacijama!'
+    ratingThankYou: 'Hvala na povratnim informacijama!',
+    payInstant: 'Plati Instant',
+    payEscrow: 'Plati Escrow'
   },
   es: {
     title: 'Celopayer',
@@ -207,7 +211,9 @@ export const translations = {
     rateTransaction: 'Calificar esta transacción',
     escrowStarted: 'Fideicomiso Iniciado',
     paymentCompleted: 'Pago Completado',
-    ratingThankYou: '¡Gracias por sus comentarios!'
+    ratingThankYou: '¡Gracias por sus comentarios!',
+    payInstant: 'Pagar Instantáneo',
+    payEscrow: 'Pagar Fideicomiso'
   },
   fr: {
     title: 'Celopayer',
@@ -275,7 +281,9 @@ export const translations = {
     rateTransaction: 'Évaluer cette transaction',
     escrowStarted: 'Escrow Démarré',
     paymentCompleted: 'Paiement Terminé',
-    ratingThankYou: 'Merci pour votre avis !'
+    ratingThankYou: 'Merci pour votre avis !',
+    payInstant: 'Payer Instantané',
+    payEscrow: 'Payer Fiducie'
   }
 }
 
