@@ -21,11 +21,13 @@ export default function Home() {
   const [timeLock, setTimeLock] = useState('3600')
   const [copied, setCopied] = useState(false)
   const [statusMsg, setStatusMsg] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
   const [mounted, setMounted] = useState(false)
   const [successTx, setSuccessTx] = useState<string | null>(null)
   
   const [lang, setLang] = useState<Language>('en')
   const [showLangMenu, setShowLangMenu] = useState(false)
+  const [showConnectMenu, setShowConnectMenu] = useState(false)
   
   const { theme, setTheme } = useTheme()
   const { width, height } = useWindowSize()
@@ -35,7 +37,7 @@ export default function Home() {
   }, [])
   
   const { address, isConnected } = useAccount()
-  const { connect } = useConnect()
+  const { connect, connectors } = useConnect()
   const { disconnect } = useDisconnect()
   const { writeContractAsync, isPending } = useWriteContract()
   const publicClient = usePublicClient()
@@ -54,13 +56,14 @@ export default function Home() {
   const total = numAmount + fee
 
   const handlePayment = async () => {
+    setErrorMsg('')
     const cleanRecipient = recipient.trim()
     if (!cleanRecipient || !/^0x[a-fA-F0-9]{40}$/.test(cleanRecipient)) {
-      alert(t.invalidAddress)
+      setErrorMsg(t.invalidAddress)
       return
     }
     if (numAmount <= 0) {
-      alert(t.invalidAmount)
+      setErrorMsg(t.invalidAmount)
       return
     }
 
@@ -127,7 +130,16 @@ export default function Home() {
     } catch (error: any) {
       console.error(error)
       setStatusMsg('')
-      alert(t.txFailed + (error.shortMessage || error.message))
+      
+      // Improve error readability
+      let errMsg = error.shortMessage || error.message
+      if (errMsg.includes('insufficient funds') || errMsg.includes('exceeds balance')) {
+        errMsg = "Nedovoljno sredstava (potreban USDC i malo CELO tokena za proviziju mreže)."
+      } else if (errMsg.includes('User rejected')) {
+        errMsg = "Transakcija je odbijena u novčaniku."
+      }
+      
+      setErrorMsg(t.txFailed + errMsg)
     }
   }
 
@@ -216,13 +228,28 @@ export default function Home() {
                 {address?.slice(0, 6)}...{address?.slice(-4)}
               </button>
             ) : (
-              <button 
-                onClick={() => connect({ connector: injected() })}
-                className="px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black font-bold rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-md flex items-center gap-2 text-sm"
-              >
-                <Wallet size={16} />
-                {t.connect}
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowConnectMenu(!showConnectMenu)}
+                  className="px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black font-bold rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-md flex items-center gap-2 text-sm"
+                >
+                  <Wallet size={16} />
+                  {t.connect}
+                </button>
+                {showConnectMenu && (
+                  <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden">
+                    {connectors.map(connector => (
+                      <button
+                        key={connector.uid}
+                        onClick={() => { connect({ connector }); setShowConnectMenu(false) }}
+                        className="w-full text-left px-4 py-3 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-b border-gray-50 dark:border-gray-700 last:border-0"
+                      >
+                        {connector.name === 'Injected' ? 'Browser / MiniPay' : connector.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </header>
@@ -326,6 +353,11 @@ export default function Home() {
             )}
           </button>
           {statusMsg && <p className="text-center font-bold mt-4 text-celo-green text-sm">{statusMsg}</p>}
+          {errorMsg && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-semibold rounded-xl text-center border border-red-100 dark:border-red-800/30">
+              {errorMsg}
+            </div>
+          )}
 
           {/* Persistent QR Code Section */}
           <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 flex flex-col items-center">
