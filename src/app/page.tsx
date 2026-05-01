@@ -247,7 +247,7 @@ export default function Home() {
             </h3>
             <div className="p-4 bg-white border border-gray-100 shadow-sm rounded-2xl mb-5">
               <QRCodeSVG 
-                value={`celo:${recipient || '0x'}?amount=${total}`} 
+                value={recipient || '0x'} 
                 size={160} 
                 fgColor="#171717"
               />
