@@ -1,4 +1,5 @@
 'use client'
+// Celopayer v0.1.1 - Fresh Build Trigger 2026-05-01
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
