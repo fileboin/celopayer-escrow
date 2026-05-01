@@ -58,9 +58,9 @@ export default function Home() {
 
   const handlePayment = async () => {
     setErrorMsg('')
-    // Extract the raw 0x address in case they pasted a URI like celo:0x... or ethereum:0x...
+    // Extract the raw 0x address from any pasted string or URI
     const match = recipient.match(/0x[a-fA-F0-9]{40}/i)
-    const cleanRecipient = match ? match[0] : ''
+    const cleanRecipient = match ? match[0] : recipient.trim()
     
     if (!cleanRecipient || !isAddress(cleanRecipient)) {
       setErrorMsg(t.invalidAddress)
@@ -218,6 +218,15 @@ export default function Home() {
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
+
+            {/* Admin Link */}
+            <a 
+              href="/admin"
+              className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+              title="Admin Panel"
+            >
+              <ShieldAlert size={18} className="text-celo-green" />
+            </a>
 
             {/* Language Selector */}
             <div className="relative">
@@ -393,7 +402,7 @@ export default function Home() {
             </h3>
             <div className="p-3 bg-white border border-gray-200 shadow-sm rounded-2xl mb-4 transition-colors">
               <QRCodeSVG 
-                value={amount && recipient ? `celo:${recipient}?amount=${amount}` : recipient || '0x'} 
+                value={recipient.match(/0x[a-fA-F0-9]{40}/i)?.[0] || recipient || '0x'} 
                 size={140} 
                 fgColor="#171717"
               />
