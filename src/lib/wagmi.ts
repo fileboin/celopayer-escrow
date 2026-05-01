@@ -7,11 +7,28 @@ const projectId = process.env.NEXT_PUBLIC_WC_PROJECT_ID || '151590f77ea5a17de506
 export const config = createConfig({
   chains: [celo, celoAlfajores],
   connectors: [
-    injected(), 
-    walletConnect({ projectId, showQrModal: true })
+    injected({ 
+      target: 'metaMask', // Prioritize MetaMask/MiniPay
+    }),
+    walletConnect({ 
+      projectId, 
+      showQrModal: false, // CRITICAL FIX: Disable QR modal on mobile - user will handle connection
+    })
   ],
   transports: {
     [celo.id]: http(),
     [celoAlfajores.id]: http(),
   },
 })
+
+// Helper to detect if we're on mobile with MiniPay
+export const isMiniPayAvailable = () => {
+  if (typeof window === 'undefined') return false
+  return !!(window as any).ethereum && (window as any).ethereum.isMiniPay === true
+}
+
+// Helper to detect if we're on a mobile device
+export const isMobileDevice = () => {
+  if (typeof window === 'undefined') return false
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+}
