@@ -58,6 +58,8 @@ function PaymentApp() {
   useEffect(() => {
     setMounted(true)
     
+    if (!searchParams) return
+    
     // Handle query params for deep linking
     const toParam = searchParams.get('to')
     const amountParam = searchParams.get('amount')

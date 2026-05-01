@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClient } from 'wagmi'
 import { injected } from 'wagmi/connectors'
 import { CONTRACT_ADDRESS, ESCROW_ABI, TREASURY_ADDRESS } from '@/lib/abi'
-import { ShieldAlert, Wallet, CheckCircle, RotateCcw, Loader2, ArrowLeft } from 'lucide-react'
+import { ShieldAlert, Wallet, CheckCircle, RotateCcw, Loader2, ArrowLeft, Send } from 'lucide-react'
 import { formatUnits } from 'viem'
 import Link from 'next/link'
+import { translations } from '@/lib/i18n'
 
 type Escrow = {
   id: number
@@ -29,6 +30,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false)
   const [processingId, setProcessingId] = useState<number | null>(null)
   const [showConnectMenu, setShowConnectMenu] = useState(false)
+  const [botLoading, setBotLoading] = useState(false)
+  
+  const t = translations.en // Default to EN for admin
 
   useEffect(() => {
     setMounted(true)
@@ -95,6 +99,23 @@ export default function AdminPage() {
       alert("Greška: " + (error.shortMessage || error.message))
     } finally {
       setProcessingId(null)
+    }
+  }
+
+  const setupTelegramBot = async () => {
+    setBotLoading(true)
+    try {
+      const response = await fetch('/api/telegram-setup', { method: 'POST' })
+      const data = await response.json()
+      if (data.ok) {
+        alert(t.botSuccess)
+      } else {
+        alert(t.botError + ": " + data.description)
+      }
+    } catch (error) {
+      alert(t.botError)
+    } finally {
+      setBotLoading(false)
     }
   }
 
@@ -166,6 +187,23 @@ export default function AdminPage() {
                 className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
               >
                 <RotateCcw size={16} /> Osveži
+              </button>
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-2xl border border-blue-100 dark:border-blue-800/30 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 flex items-center gap-2">
+                  <Send size={20} /> Telegram Bot Setup
+                </h3>
+                <p className="text-sm text-blue-700 dark:text-blue-400">Connect your bot to handle commands and notifications.</p>
+              </div>
+              <button 
+                onClick={setupTelegramBot}
+                disabled={botLoading}
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                {botLoading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+                {t.setupBot}
               </button>
             </div>
 

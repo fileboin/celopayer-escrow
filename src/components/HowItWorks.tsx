@@ -35,6 +35,21 @@ export function HowItWorks() {
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Buyer confirms delivery, instantly releasing the funds to the seller's wallet.</p>
           </div>
         </div>
+
+        <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-700">
+          <div className="flex items-start gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+            <div className="flex-shrink-0 text-celo-green">
+              <ShieldCheck size={24} />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Non-Custodial & Secure</h4>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+                Celopayer never holds your funds. All transactions are handled by immutable smart contracts. 
+                Your money is always either in your wallet, the recipient's wallet, or safely locked in the contract until you release it.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
