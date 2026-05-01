@@ -59,7 +59,7 @@ export default function Home() {
   const handlePayment = async () => {
     setErrorMsg('')
     const cleanRecipient = recipient.trim()
-    if (!cleanRecipient || !/^0x[a-fA-F0-9]{40}$/.test(cleanRecipient)) {
+    if (!cleanRecipient || !isAddress(cleanRecipient)) {
       setErrorMsg(t.invalidAddress)
       return
     }
