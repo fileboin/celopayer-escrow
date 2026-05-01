@@ -36,6 +36,7 @@ function PaymentApp() {
   const [errorMsg, setErrorMsg] = useState('')
   const [mounted, setMounted] = useState(false)
   const [successTx, setSuccessTx] = useState<string | null>(null)
+  const [successMode, setSuccessMode] = useState<'instant' | 'escrow'>('instant')
   const [isConfirming, setIsConfirming] = useState(false)
   
   const [lang, setLang] = useState<Language>('en')
@@ -169,6 +170,7 @@ function PaymentApp() {
 
         setStatusMsg(t.paymentSuccess)
         setIsConfirming(false)
+        setSuccessMode('escrow')
         setSuccessTx(escrowHash)
       } else { // instant
         setStatusMsg(t.waitTrans)
@@ -190,6 +192,7 @@ function PaymentApp() {
 
         setStatusMsg(t.paymentSuccess)
         setIsConfirming(false)
+        setSuccessMode('instant')
         setSuccessTx(transferHash)
       }
 
@@ -326,7 +329,7 @@ Thank you for using Celopayer!
              <span className="text-5xl">✅</span>
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2 tracking-tight">
-            {mode === 'escrow' ? t.escrowStarted : t.paymentCompleted}
+            {successMode === 'escrow' ? t.escrowStarted : t.paymentCompleted}
           </h2>
           <p className="text-gray-500 dark:text-gray-400 mb-6 font-medium">{t.successDesc}</p>
           
@@ -390,8 +393,8 @@ Thank you for using Celopayer!
       <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-4 sm:p-8 transition-colors text-center">
         <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-gray-100 dark:border-gray-700 flex flex-col items-center">
           <Loader2 className="animate-spin text-celo-green mb-6" size={64} />
-          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">Transakcija u toku...</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-6 font-medium">Transakcija je poslata na mrežu. Molimo sačekajte par sekundi za potvrdu.</p>
+          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">Transaction in progress...</h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-6 font-medium">Transaction sent to the network. Please wait a few seconds for confirmation.</p>
           <div className="w-full bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
             <p className="text-xs font-mono text-gray-400 break-all">{statusMsg}</p>
           </div>
@@ -756,7 +759,7 @@ Thank you for using Celopayer!
             </h3>
             <div className="p-3 bg-white border border-gray-200 shadow-sm rounded-2xl mb-4 transition-colors">
               <QRCodeSVG 
-                value={recipient.match(/0x[a-fA-F0-9]{40}/i)?.[0] || recipient || '0x'} 
+                value={getShareUrl() || recipient.match(/0x[a-fA-F0-9]{40}/i)?.[0] || recipient || '0x'} 
                 size={140} 
                 fgColor="#171717"
               />
