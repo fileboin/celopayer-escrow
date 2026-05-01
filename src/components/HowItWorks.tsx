@@ -2,8 +2,8 @@ import { ShieldCheck, LockKeyhole, ArrowRightLeft } from 'lucide-react'
 
 export function HowItWorks() {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-8 mb-8">
-      <h3 className="text-xl font-semibold mb-6 text-foreground text-center">How Celopayer Works</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 mt-8 mb-8 transition-colors">
+      <h3 className="text-xl font-semibold mb-6 text-foreground dark:text-white text-center">How Celopayer Works</h3>
       
       <div className="space-y-6">
         <div className="flex items-start gap-4">
@@ -11,8 +11,8 @@ export function HowItWorks() {
             <LockKeyhole size={20} />
           </div>
           <div>
-            <h4 className="font-medium text-foreground">1. Lock Funds</h4>
-            <p className="text-sm text-gray-500 mt-1">Buyer pays for the item. The funds are locked safely in our smart contract.</p>
+            <h4 className="font-medium text-foreground dark:text-gray-100">1. Lock Funds</h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Buyer pays for the item. The funds are locked safely in our smart contract.</p>
           </div>
         </div>
         
@@ -21,8 +21,8 @@ export function HowItWorks() {
             <ArrowRightLeft size={20} />
           </div>
           <div>
-            <h4 className="font-medium text-foreground">2. Await Delivery</h4>
-            <p className="text-sm text-gray-500 mt-1">Seller ships or delivers the service. Buyer inspects upon arrival.</p>
+            <h4 className="font-medium text-foreground dark:text-gray-100">2. Await Delivery</h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Seller ships or delivers the service. Buyer inspects upon arrival.</p>
           </div>
         </div>
         
@@ -31,8 +31,8 @@ export function HowItWorks() {
             <ShieldCheck size={20} />
           </div>
           <div>
-            <h4 className="font-medium text-foreground">3. Release & Get Paid</h4>
-            <p className="text-sm text-gray-500 mt-1">Buyer confirms delivery, instantly releasing the funds to the seller's wallet.</p>
+            <h4 className="font-medium text-foreground dark:text-gray-100">3. Release & Get Paid</h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Buyer confirms delivery, instantly releasing the funds to the seller's wallet.</p>
           </div>
         </div>
       </div>
