@@ -636,6 +636,28 @@ Thank you for using Celopayer!
             />
           </div>
 
+          {/* NEW PROMINENT PAYMENT BUTTON (MOVED UP) */}
+          {flow !== 'scheduled' && (
+            <button 
+              onClick={!isConnected ? () => setShowConnectMenu(true) : handlePayment}
+              disabled={isPending}
+              id="main-payment-button-top"
+              className={`w-full mb-6 p-5 text-white font-black text-xl rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 transform active:scale-95 animate-pulse-subtle ${
+                !isConnected 
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-black' 
+                  : 'bg-[#2AAB66] hover:bg-[#249558] shadow-celo-green/40 border-b-4 border-[#1e7a48]'
+              }`}
+            >
+              {!isConnected ? (
+                <><Wallet size={24} /> {t.connectToPay}</>
+              ) : isPending ? (
+                <><Loader2 className="animate-spin text-white" size={24} /> {t.processing}</>
+              ) : (
+                <><Zap size={24} /> {flow === 'request' ? t.generateLink : (mode === 'escrow' ? t.payWith : t.sendPayment)}</>
+              )}
+            </button>
+          )}
+
           {mode === 'escrow' && (
             <div className="mb-6">
               <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">{t.timeLock}</label>
@@ -690,24 +712,14 @@ Thank you for using Celopayer!
             </div>
           )}
 
+          {/* Secondary Payment Button at the bottom for convenience */}
           {flow !== 'scheduled' && (
             <button 
               onClick={!isConnected ? () => setShowConnectMenu(true) : handlePayment}
               disabled={isPending}
-              id="main-payment-button"
-              className={`w-full p-5 text-white font-black text-xl rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 transform active:scale-95 ${
-                !isConnected 
-                  ? 'bg-gray-900 dark:bg-white text-white dark:text-black' 
-                  : 'bg-gradient-to-r from-[#2AAB66] to-[#F6C644] hover:brightness-110 shadow-celo-green/30'
-              }`}
+              className="w-full p-4 text-gray-400 dark:text-gray-500 font-bold text-sm rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all mb-4"
             >
-              {!isConnected ? (
-                <><Wallet size={24} /> {t.connectToPay}</>
-              ) : isPending ? (
-                <><Loader2 className="animate-spin text-white" size={24} /> {t.processing}</>
-              ) : (
-                <><Zap size={24} /> {flow === 'request' ? t.generateLink : (mode === 'escrow' ? t.payWith : t.sendPayment)}</>
-              )}
+              {t.payWith}
             </button>
           )}
           
