@@ -24,6 +24,7 @@ export default function Home() {
   const [errorMsg, setErrorMsg] = useState('')
   const [mounted, setMounted] = useState(false)
   const [successTx, setSuccessTx] = useState<string | null>(null)
+  const [isConfirming, setIsConfirming] = useState(false)
   
   const [lang, setLang] = useState<Language>('en')
   const [showLangMenu, setShowLangMenu] = useState(false)
@@ -99,7 +100,8 @@ export default function Home() {
           args: [cleanRecipient as `0x${string}`, parsedAmount, BigInt(timeLock)],
         })
         
-        setStatusMsg(t.waitEscrow)
+        setIsConfirming(true)
+        setStatusMsg(t.creatEscrow + " (Hash: " + escrowHash.slice(0, 10) + "...)")
         const escrowReceipt = await publicClient?.waitForTransactionReceipt({ hash: escrowHash })
 
         if (escrowReceipt?.status !== 'success') {
@@ -107,9 +109,10 @@ export default function Home() {
         }
 
         setStatusMsg(t.paymentSuccess)
+        setIsConfirming(false)
         setSuccessTx(escrowHash)
       } else {
-        setStatusMsg(t.transUsdc)
+        setStatusMsg(t.waitTrans)
         const transferHash = await writeContractAsync({
           address: USDC_ADDRESS,
           abi: USDC_ABI,
@@ -117,7 +120,8 @@ export default function Home() {
           args: [cleanRecipient as `0x${string}`, parsedAmount],
         })
         
-        setStatusMsg(t.waitTrans)
+        setIsConfirming(true)
+        setStatusMsg(t.waitTrans + " (Hash: " + transferHash.slice(0, 10) + "...)")
         const transferReceipt = await publicClient?.waitForTransactionReceipt({ hash: transferHash })
 
         if (transferReceipt?.status !== 'success') {
@@ -125,11 +129,13 @@ export default function Home() {
         }
 
         setStatusMsg(t.paymentSuccess)
+        setIsConfirming(false)
         setSuccessTx(transferHash)
       }
     } catch (error: any) {
       console.error(error)
       setStatusMsg('')
+      setIsConfirming(false)
       
       // Improve error readability
       let errMsg = error.shortMessage || error.message
@@ -173,6 +179,21 @@ export default function Home() {
           >
             {t.newPayment}
           </button>
+        </div>
+      </main>
+    )
+  }
+
+  if (isConfirming) {
+    return (
+      <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-4 sm:p-8 transition-colors text-center">
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-gray-100 dark:border-gray-700 flex flex-col items-center">
+          <Loader2 className="animate-spin text-celo-green mb-6" size={64} />
+          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-2">Transakcija u toku...</h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-6 font-medium">Transakcija je poslata na mrežu. Molimo sačekajte par sekundi za potvrdu.</p>
+          <div className="w-full bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+            <p className="text-xs font-mono text-gray-400 break-all">{statusMsg}</p>
+          </div>
         </div>
       </main>
     )
@@ -366,7 +387,7 @@ export default function Home() {
             </h3>
             <div className="p-3 bg-white border border-gray-200 shadow-sm rounded-2xl mb-4 transition-colors">
               <QRCodeSVG 
-                value={recipient || '0x'} 
+                value={amount && recipient ? `celo:${recipient}?amount=${amount}` : recipient || '0x'} 
                 size={140} 
                 fgColor="#171717"
               />
