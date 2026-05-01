@@ -53,7 +53,7 @@ export default function AdminPage() {
           abi: ESCROW_ABI,
           functionName: 'escrows',
           args: [BigInt(i)],
-        }) as any[]
+        }) as readonly any[]
         
         fetchedEscrows.push({
           id: i,
