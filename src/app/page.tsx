@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { HowItWorks } from '@/components/HowItWorks'
 import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2 } from 'lucide-react'
-import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClient } from 'wagmi'
 import { injected } from 'wagmi/connectors'
 import { QRCodeSVG } from 'qrcode.react'
 import { parseUnits } from 'viem'
@@ -21,6 +21,7 @@ export default function Home() {
   const { connect } = useConnect()
   const { disconnect } = useDisconnect()
   const { writeContractAsync, isPending } = useWriteContract()
+  const publicClient = usePublicClient()
 
   const handleCopy = () => {
     navigator.clipboard.writeText(CONTRACT_ADDRESS)
@@ -57,6 +58,13 @@ export default function Home() {
           args: [CONTRACT_ADDRESS, totalWithFee],
         })
         
+        setStatusMsg('Waiting for approval confirmation...')
+        const approveReceipt = await publicClient?.waitForTransactionReceipt({ hash: approveHash })
+        
+        if (approveReceipt?.status !== 'success') {
+          throw new Error('Approval transaction failed on the blockchain.')
+        }
+
         setStatusMsg('Creating Escrow...')
         const escrowHash = await writeContractAsync({
           address: CONTRACT_ADDRESS,
@@ -65,6 +73,13 @@ export default function Home() {
           args: [recipient as `0x${string}`, parsedAmount, BigInt(timeLock)],
         })
         
+        setStatusMsg('Waiting for escrow confirmation...')
+        const escrowReceipt = await publicClient?.waitForTransactionReceipt({ hash: escrowHash })
+
+        if (escrowReceipt?.status !== 'success') {
+          throw new Error('Escrow creation failed on the blockchain.')
+        }
+
         setStatusMsg('Payment successful!')
         alert('Escrow created successfully! TX: ' + escrowHash)
       } else {
@@ -77,6 +92,13 @@ export default function Home() {
           args: [recipient as `0x${string}`, parsedAmount],
         })
         
+        setStatusMsg('Waiting for transfer confirmation...')
+        const transferReceipt = await publicClient?.waitForTransactionReceipt({ hash: transferHash })
+
+        if (transferReceipt?.status !== 'success') {
+          throw new Error('Transfer transaction failed on the blockchain.')
+        }
+
         setStatusMsg('Payment successful!')
         alert('Instant transfer successful! TX: ' + transferHash)
       }
@@ -88,22 +110,22 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[#FBCC5C] flex flex-col items-center justify-center p-4">
+    <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-md">
         {/* Header */}
         <header className="flex justify-between items-center mb-6 w-full">
-          <h1 className="text-3xl font-extrabold tracking-tight text-black">Celopayer</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Celopayer</h1>
           {isConnected ? (
             <button 
               onClick={() => disconnect()}
-              className="text-sm font-bold px-4 py-2 rounded-xl bg-white text-black border-2 border-yellow-500 hover:bg-yellow-100 transition-all"
+              className="text-sm font-semibold px-4 py-2 rounded-xl bg-white text-gray-700 border border-gray-200 shadow-sm hover:bg-gray-50 transition-all"
             >
               {address?.slice(0, 6)}...{address?.slice(-4)}
             </button>
           ) : (
             <button 
               onClick={() => connect({ connector: injected() })}
-              className="px-5 py-3 bg-yellow-500 text-black font-bold uppercase rounded-xl hover:bg-yellow-600 transition-all border-2 border-black flex items-center gap-2"
+              className="px-5 py-2.5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-50 transition-all border border-gray-200 shadow-sm flex items-center gap-2"
             >
               <Wallet size={18} />
               Connect
@@ -112,13 +134,13 @@ export default function Home() {
         </header>
 
         {/* Mode Switcher */}
-        <div className="flex bg-white border-2 border-yellow-500 p-1 rounded-xl mb-6">
+        <div className="flex bg-gray-100/80 p-1.5 rounded-xl mb-6 shadow-inner">
           <button
             onClick={() => setMode('escrow')}
-            className={`flex-1 py-3 text-sm font-bold rounded-lg flex justify-center items-center gap-2 transition-all uppercase ${
+            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg flex justify-center items-center gap-2 transition-all ${
               mode === 'escrow' 
-                ? 'bg-yellow-500 text-black border-2 border-black' 
-                : 'text-gray-600 hover:text-black border-2 border-transparent'
+                ? 'bg-white text-celo-green shadow-sm' 
+                : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             <ShieldAlert size={18} />
@@ -126,10 +148,10 @@ export default function Home() {
           </button>
           <button
             onClick={() => setMode('instant')}
-            className={`flex-1 py-3 text-sm font-bold rounded-lg flex justify-center items-center gap-2 transition-all uppercase ${
+            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg flex justify-center items-center gap-2 transition-all ${
               mode === 'instant' 
-                ? 'bg-yellow-500 text-black border-2 border-black' 
-                : 'text-gray-600 hover:text-black border-2 border-transparent'
+                ? 'bg-white text-celo-green shadow-sm' 
+                : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             <Zap size={18} />
@@ -138,39 +160,39 @@ export default function Home() {
         </div>
 
         {/* Payment Form */}
-        <div className="bg-white rounded-2xl border-4 border-black p-6 mb-6">
+        <div className="bg-white rounded-3xl shadow-lg shadow-gray-200/50 border border-gray-100 p-6 sm:p-8 mb-6">
           
-          <div className="mb-4">
-            <label className="block text-sm font-bold text-black mb-2 uppercase">
+          <div className="mb-5">
+            <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
               {mode === 'escrow' ? 'Seller Address' : 'Recipient Address'}
             </label>
             <input 
               type="text"
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
-              className="w-full p-3 bg-white text-black border-2 border-yellow-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-600 font-mono text-sm"
+              className="w-full p-3.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-celo-green/30 focus:border-celo-green transition-all font-mono text-sm"
               placeholder="0x..."
             />
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-bold text-black mb-2 uppercase">Amount (USDC)</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">Amount (USDC)</label>
             <input 
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full p-3 bg-white text-black border-2 border-yellow-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-600 text-xl font-bold"
+              className="w-full p-3.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-celo-green/30 focus:border-celo-green transition-all text-lg font-semibold"
               placeholder="0.00"
             />
           </div>
 
           {mode === 'escrow' && (
             <div className="mb-6">
-              <label className="block text-sm font-bold text-black mb-2 uppercase">Time-Lock</label>
+              <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">Time-Lock</label>
               <select 
                 value={timeLock}
                 onChange={(e) => setTimeLock(e.target.value)}
-                className="w-full p-3 bg-white text-black border-2 border-yellow-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-600 font-bold cursor-pointer"
+                className="w-full p-3.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-celo-green/30 focus:border-celo-green transition-all font-semibold cursor-pointer appearance-none"
               >
                 <option value="3600">1 Hour</option>
                 <option value="86400">24 Hours</option>
@@ -180,17 +202,17 @@ export default function Home() {
             </div>
           )}
 
-          <div className="space-y-2 mb-6 bg-yellow-100 border-2 border-yellow-500 p-4 rounded-lg text-black font-medium">
-            <div className="flex justify-between">
+          <div className="space-y-3 mb-6 bg-gray-50/80 border border-gray-100 p-5 rounded-2xl text-gray-600 font-medium text-sm">
+            <div className="flex justify-between items-center">
               <span>Amount</span>
-              <span className="font-bold">${numAmount.toFixed(2)}</span>
+              <span className="font-semibold text-gray-900">${numAmount.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span>Fee {mode === 'escrow' ? '(0.5%)' : '(0%)'}</span>
-              <span className="font-bold">${fee.toFixed(2)}</span>
+              <span className="font-semibold text-gray-900">${fee.toFixed(2)}</span>
             </div>
-            <div className="h-0.5 bg-yellow-500 w-full my-2"></div>
-            <div className="flex justify-between font-black text-xl">
+            <div className="h-px bg-gray-200 w-full my-2"></div>
+            <div className="flex justify-between items-center font-bold text-lg text-gray-900">
               <span>Total</span>
               <span>${total.toFixed(2)}</span>
             </div>
@@ -199,36 +221,37 @@ export default function Home() {
           <button 
             onClick={handlePayment}
             disabled={!isConnected || isPending}
-            className="w-full p-4 bg-yellow-500 text-black font-bold uppercase rounded-xl hover:bg-yellow-600 transition-all flex items-center justify-center gap-2 border-4 border-black disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full p-4 bg-celo-green text-white font-bold rounded-xl hover:bg-[#2AAB66] transition-all shadow-md shadow-celo-green/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending ? (
-              <><Loader2 className="animate-spin text-black" size={24} /> PROCESSING...</>
+              <><Loader2 className="animate-spin text-white" size={24} /> Processing...</>
             ) : (
-              'PAY WITH MINIPAY'
+              'Pay with MiniPay'
             )}
           </button>
-          {statusMsg && <p className="text-center font-bold mt-4 text-black uppercase">{statusMsg}</p>}
+          {statusMsg && <p className="text-center font-semibold mt-4 text-celo-green text-sm">{statusMsg}</p>}
         </div>
 
         {/* QR & Copy Section */}
-        {total > 0 && (
-          <div className="bg-white rounded-2xl border-4 border-black p-6 flex flex-col items-center mb-6">
-            <h3 className="font-bold text-black mb-4 uppercase">
-              {mode === 'escrow' ? 'Escrow Contract Address' : 'Recipient Address'}
+        {total > 0 && mode === 'instant' && (
+          <div className="bg-white rounded-3xl shadow-lg shadow-gray-200/50 border border-gray-100 p-6 flex flex-col items-center mb-6">
+            <h3 className="font-semibold text-gray-600 mb-5 text-sm uppercase tracking-wider">
+              Scan to Pay
             </h3>
-            <div className="p-4 bg-white border-4 border-yellow-500 rounded-xl mb-4">
+            <div className="p-4 bg-white border border-gray-100 shadow-sm rounded-2xl mb-5">
               <QRCodeSVG 
-                value={`celo:${mode === 'escrow' ? CONTRACT_ADDRESS : (recipient || '0x')}?amount=${total}`} 
+                value={`celo:${recipient || '0x'}?amount=${total}`} 
                 size={160} 
+                fgColor="#171717"
               />
             </div>
             
             <button 
               onClick={handleCopy}
-              className="flex items-center gap-2 font-bold text-black bg-yellow-100 border-2 border-yellow-500 py-3 px-6 rounded-xl hover:bg-yellow-200 transition-colors uppercase"
+              className="flex items-center gap-2 font-semibold text-gray-700 bg-gray-50 border border-gray-200 py-2.5 px-5 rounded-xl hover:bg-gray-100 transition-colors text-sm"
             >
-              {copied ? <CheckCircle2 size={18} className="text-black" /> : <Copy size={18} />}
-              {copied ? 'COPIED!' : 'COPY ADDRESS'}
+              {copied ? <CheckCircle2 size={16} className="text-celo-green" /> : <Copy size={16} />}
+              {copied ? 'Copied to Clipboard' : 'Copy Address'}
             </button>
           </div>
         )}
