@@ -424,17 +424,15 @@ Thank you for using Celopayer!
             </a>
 
             {/* Telegram Bot Link */}
-            {process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME && (
-              <a 
-                href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME}`}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
-                title="Telegram Bot"
-              >
-                <Send size={18} className="text-[#0088cc]" />
-              </a>
-            )}
+            <a 
+              href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'volegram-celopay'}`}
+              target="_blank"
+              rel="noreferrer"
+              className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+              title="Telegram Bot"
+            >
+              <Send size={18} className="text-[#0088cc]" />
+            </a>
 
             {/* Language Selector */}
             <div className="relative">
