@@ -431,7 +431,7 @@ Thank you for using Celopayer!
               className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
               title="Telegram Bot"
             >
-              <Send size={18} className="text-[#0088cc]" />
+              <MessageCircle size={18} className="text-[#0088cc]" />
             </a>
 
             {/* Language Selector */}
@@ -694,21 +694,23 @@ Thank you for using Celopayer!
             <button 
               onClick={!isConnected ? () => setShowConnectMenu(true) : handlePayment}
               disabled={isPending}
-              className={`w-full p-4 text-white font-extrabold text-lg rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-0.5 ${
+              id="main-payment-button"
+              className={`w-full p-5 text-white font-black text-xl rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 transform active:scale-95 ${
                 !isConnected 
                   ? 'bg-gray-900 dark:bg-white text-white dark:text-black' 
-                  : 'bg-gradient-to-r from-[#2AAB66] to-[#F6C644] shadow-celo-green/30'
+                  : 'bg-gradient-to-r from-[#2AAB66] to-[#F6C644] hover:brightness-110 shadow-celo-green/30'
               }`}
             >
               {!isConnected ? (
-                <><Wallet size={20} /> {t.connectToPay}</>
+                <><Wallet size={24} /> {t.connectToPay}</>
               ) : isPending ? (
                 <><Loader2 className="animate-spin text-white" size={24} /> {t.processing}</>
               ) : (
-                flow === 'request' ? t.generateLink : t.payWith
+                <><Zap size={24} /> {flow === 'request' ? t.generateLink : (mode === 'escrow' ? t.payWith : t.sendPayment)}</>
               )}
             </button>
           )}
+          
           {statusMsg && <p className="text-center font-bold mt-4 text-celo-green text-sm">{statusMsg}</p>}
           {errorMsg && (
             <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-semibold rounded-xl text-center border border-red-100 dark:border-red-800/30">
