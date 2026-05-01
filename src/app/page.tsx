@@ -58,7 +58,10 @@ export default function Home() {
 
   const handlePayment = async () => {
     setErrorMsg('')
-    const cleanRecipient = recipient.trim()
+    // Extract the raw 0x address in case they pasted a URI like celo:0x... or ethereum:0x...
+    const match = recipient.match(/0x[a-fA-F0-9]{40}/i)
+    const cleanRecipient = match ? match[0] : ''
+    
     if (!cleanRecipient || !isAddress(cleanRecipient)) {
       setErrorMsg(t.invalidAddress)
       return
@@ -311,7 +314,10 @@ export default function Home() {
             <input 
               type="text"
               value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
+              onChange={(e) => {
+                setRecipient(e.target.value)
+                setErrorMsg('')
+              }}
               className="w-full p-3.5 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-celo-green/50 focus:border-celo-green transition-all font-mono text-sm"
               placeholder="0x..."
             />
@@ -404,6 +410,13 @@ export default function Home() {
         </div>
 
         <HowItWorks />
+
+        {/* Footer with Admin Link */}
+        <footer className="mt-8 text-center">
+          <a href="/admin" className="text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+            Admin Panel
+          </a>
+        </footer>
 
       </div>
     </main>
