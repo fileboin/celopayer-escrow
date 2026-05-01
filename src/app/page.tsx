@@ -573,15 +573,6 @@ Thank you for using Celopayer!
             {/* Pay buttons — prominently placed below the toggle */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               <button
-                id="btn-pay-instant"
-                onClick={() => !isConnected ? setShowConnectMenu(true) : handlePayment('instant')}
-                disabled={isPending}
-                className="flex items-center justify-center gap-2 py-4 px-3 bg-[#2AAB66] hover:bg-[#249558] active:scale-95 text-white font-black rounded-2xl shadow-lg shadow-green-500/30 border-b-4 border-[#1e7a48] transition-all text-sm"
-              >
-                <Zap size={18} />
-                {t.payInstant}
-              </button>
-              <button
                 id="btn-pay-escrow"
                 onClick={() => !isConnected ? setShowConnectMenu(true) : handlePayment('escrow')}
                 disabled={isPending}
@@ -589,6 +580,15 @@ Thank you for using Celopayer!
               >
                 <ShieldAlert size={18} />
                 {t.payEscrow}
+              </button>
+              <button
+                id="btn-pay-instant"
+                onClick={() => !isConnected ? setShowConnectMenu(true) : handlePayment('instant')}
+                disabled={isPending}
+                className="flex items-center justify-center gap-2 py-4 px-3 bg-[#2AAB66] hover:bg-[#249558] active:scale-95 text-white font-black rounded-2xl shadow-lg shadow-green-500/30 border-b-4 border-[#1e7a48] transition-all text-sm"
+              >
+                <Zap size={18} />
+                {t.payInstant}
               </button>
             </div>
           </>
