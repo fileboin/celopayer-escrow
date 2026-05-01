@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { HowItWorks } from '@/components/HowItWorks'
-import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2 } from 'lucide-react'
+import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2, QrCode } from 'lucide-react'
+import Confetti from 'react-confetti'
+import { useWindowSize } from 'react-use'
 import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClient } from 'wagmi'
 import { injected } from 'wagmi/connectors'
 import { QRCodeSVG } from 'qrcode.react'
@@ -11,12 +13,16 @@ import { USDC_ABI, ESCROW_ABI, CONTRACT_ADDRESS, USDC_ADDRESS } from '@/lib/abi'
 
 export default function Home() {
   const [mode, setMode] = useState<'escrow' | 'instant'>('escrow')
+  const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'qr'>('wallet')
   const [recipient, setRecipient] = useState('')
   const [amount, setAmount] = useState('')
   const [timeLock, setTimeLock] = useState('3600')
   const [copied, setCopied] = useState(false)
   const [statusMsg, setStatusMsg] = useState('')
   const [mounted, setMounted] = useState(false)
+  const [successTx, setSuccessTx] = useState<string | null>(null)
+  
+  const { width, height } = useWindowSize()
   
   useEffect(() => {
     setMounted(true)
@@ -91,7 +97,7 @@ export default function Home() {
         }
 
         setStatusMsg('Payment successful!')
-        alert('Escrow created successfully! TX: ' + escrowHash)
+        setSuccessTx(escrowHash)
       } else {
         // Instant Mode: Direct USDC transfer
         setStatusMsg('Transferring USDC...')
@@ -110,7 +116,7 @@ export default function Home() {
         }
 
         setStatusMsg('Payment successful!')
-        alert('Instant transfer successful! TX: ' + transferHash)
+        setSuccessTx(transferHash)
       }
     } catch (error: any) {
       console.error(error)
@@ -120,6 +126,39 @@ export default function Home() {
   }
 
   if (!mounted) return null
+
+  if (successTx) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-8">
+        <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />
+        <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative overflow-hidden border border-gray-100">
+          <div className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+             <span className="text-5xl">🎉</span>
+          </div>
+          <h2 className="text-3xl font-extrabold text-gray-900 mb-2 tracking-tight">Uplata Uspela!</h2>
+          <p className="text-gray-500 mb-8 font-medium">Tvoja transakcija je uspešno potvrđena na mreži.</p>
+          <a 
+            href={`https://celoscan.io/tx/${successTx}`} 
+            target="_blank" 
+            rel="noreferrer" 
+            className="block w-full py-3.5 px-4 bg-gray-100 text-gray-700 font-bold rounded-xl mb-3 hover:bg-gray-200 transition-colors"
+          >
+            Pregled na CeloScan-u
+          </a>
+          <button 
+            onClick={() => {
+              setSuccessTx(null)
+              setAmount('')
+              setRecipient('')
+            }} 
+            className="block w-full py-3.5 px-4 bg-celo-green text-white font-bold rounded-xl hover:bg-[#2AAB66] transition-colors shadow-md shadow-celo-green/20"
+          >
+            Nova Uplata
+          </button>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 sm:p-8">
@@ -170,6 +209,34 @@ export default function Home() {
             Instant
           </button>
         </div>
+
+        {/* Payment Method Switcher (Only for Instant Mode) */}
+        {mode === 'instant' && (
+          <div className="flex bg-gray-100/80 p-1.5 rounded-xl mb-6 shadow-inner">
+            <button
+              onClick={() => setPaymentMethod('wallet')}
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg flex justify-center items-center gap-2 transition-all ${
+                paymentMethod === 'wallet' 
+                  ? 'bg-white text-celo-green shadow-sm' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Wallet size={16} />
+              Web3 Novčanik
+            </button>
+            <button
+              onClick={() => setPaymentMethod('qr')}
+              className={`flex-1 py-2 text-sm font-semibold rounded-lg flex justify-center items-center gap-2 transition-all ${
+                paymentMethod === 'qr' 
+                  ? 'bg-white text-celo-green shadow-sm' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <QrCode size={16} />
+              Prikaži QR Kod
+            </button>
+          </div>
+        )}
 
         {/* Payment Form */}
         <div className="bg-white rounded-3xl shadow-lg shadow-gray-200/50 border border-gray-100 p-6 sm:p-8 mb-6">
@@ -232,43 +299,43 @@ export default function Home() {
             </div>
           </div>
 
-          <button 
-            onClick={handlePayment}
-            disabled={!isConnected || isPending}
-            className="w-full p-4 bg-celo-green text-white font-bold rounded-xl hover:bg-[#2AAB66] transition-all shadow-md shadow-celo-green/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isPending ? (
-              <><Loader2 className="animate-spin text-white" size={24} /> Processing...</>
-            ) : (
-              'Pay with MiniPay'
-            )}
-          </button>
-          {statusMsg && <p className="text-center font-semibold mt-4 text-celo-green text-sm">{statusMsg}</p>}
-        </div>
-
-        {/* QR & Copy Section */}
-        {total > 0 && mode === 'instant' && (
-          <div className="bg-white rounded-3xl shadow-lg shadow-gray-200/50 border border-gray-100 p-6 flex flex-col items-center mb-6">
-            <h3 className="font-semibold text-gray-600 mb-5 text-sm uppercase tracking-wider">
-              Scan to Pay
-            </h3>
-            <div className="p-4 bg-white border border-gray-100 shadow-sm rounded-2xl mb-5">
-              <QRCodeSVG 
-                value={recipient || '0x'} 
-                size={160} 
-                fgColor="#171717"
-              />
+          {mode === 'instant' && paymentMethod === 'qr' ? (
+            <div className="flex flex-col items-center mt-2 pt-2 border-t border-gray-100">
+              <h3 className="font-semibold text-gray-500 mb-4 text-xs uppercase tracking-wider">
+                Skeniraj za uplatu
+              </h3>
+              <div className="p-3 bg-white border border-gray-200 shadow-sm rounded-2xl mb-4">
+                <QRCodeSVG 
+                  value={recipient || '0x'} 
+                  size={160} 
+                  fgColor="#171717"
+                />
+              </div>
+              <button 
+                onClick={handleCopy}
+                className="flex items-center gap-2 font-semibold text-gray-700 bg-gray-50 border border-gray-200 py-2.5 px-5 rounded-xl hover:bg-gray-100 transition-colors text-sm w-full justify-center"
+              >
+                {copied ? <CheckCircle2 size={16} className="text-celo-green" /> : <Copy size={16} />}
+                {copied ? 'Adresa Kopirana!' : 'Kopiraj Adresu'}
+              </button>
             </div>
-            
-            <button 
-              onClick={handleCopy}
-              className="flex items-center gap-2 font-semibold text-gray-700 bg-gray-50 border border-gray-200 py-2.5 px-5 rounded-xl hover:bg-gray-100 transition-colors text-sm"
-            >
-              {copied ? <CheckCircle2 size={16} className="text-celo-green" /> : <Copy size={16} />}
-              {copied ? 'Copied to Clipboard' : 'Copy Address'}
-            </button>
-          </div>
-        )}
+          ) : (
+            <>
+              <button 
+                onClick={handlePayment}
+                disabled={!isConnected || isPending}
+                className="w-full p-4 bg-celo-green text-white font-bold rounded-xl hover:bg-[#2AAB66] transition-all shadow-md shadow-celo-green/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isPending ? (
+                  <><Loader2 className="animate-spin text-white" size={24} /> Obrađuje se...</>
+                ) : (
+                  'Plati sa MiniPay / Web3'
+                )}
+              </button>
+              {statusMsg && <p className="text-center font-semibold mt-4 text-celo-green text-sm">{statusMsg}</p>}
+            </>
+          )}
+        </div>
 
         <HowItWorks />
 
