@@ -39,6 +39,7 @@ function PaymentApp() {
   const [lang, setLang] = useState<Language>('en')
   const [showLangMenu, setShowLangMenu] = useState(false)
   const [showConnectMenu, setShowConnectMenu] = useState(false)
+  const [flow, setFlow] = useState<'send' | 'request'>('send')
   
   const { theme, setTheme } = useTheme()
   const { width, height } = useWindowSize()
@@ -350,39 +351,77 @@ function PaymentApp() {
           </div>
         </header>
 
-        {/* Mode Switcher */}
+        {/* Send / Request Switcher */}
         <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-full mb-6">
           <button
-            onClick={() => setMode('escrow')}
+            onClick={() => setFlow('send')}
             className={`flex-1 py-3 text-sm font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
-              mode === 'escrow' 
-                ? 'bg-black dark:bg-white text-white dark:text-black shadow-md' 
+              flow === 'send' 
+                ? 'bg-[#2AAB66] text-white shadow-md' 
                 : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
             }`}
           >
-            <ShieldAlert size={18} />
-            {t.escrow}
+            <Send size={18} />
+            {t.sendPayment}
           </button>
           <button
-            onClick={() => setMode('instant')}
+            onClick={() => setFlow('request')}
             className={`flex-1 py-3 text-sm font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
-              mode === 'instant' 
-                ? 'bg-black dark:bg-white text-white dark:text-black shadow-md' 
+              flow === 'request' 
+                ? 'bg-[#F6C644] text-black shadow-md' 
                 : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
             }`}
           >
-            <Zap size={18} />
-            {t.instant}
+            <QrCode size={18} />
+            {t.requestPayment}
           </button>
         </div>
+
+        {/* Mode Switcher (only for Send mode) */}
+        {flow === 'send' && (
+          <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-full mb-6">
+            <button
+              onClick={() => setMode('escrow')}
+              className={`flex-1 py-3 text-sm font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
+                mode === 'escrow' 
+                  ? 'bg-black dark:bg-white text-white dark:text-black shadow-md' 
+                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+              }`}
+            >
+              <ShieldAlert size={18} />
+              {t.escrow}
+            </button>
+            <button
+              onClick={() => setMode('instant')}
+              className={`flex-1 py-3 text-sm font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
+                mode === 'instant' 
+                  ? 'bg-black dark:bg-white text-white dark:text-black shadow-md' 
+                  : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+              }`}
+            >
+              <Zap size={18} />
+              {t.instant}
+            </button>
+          </div>
+        )}
 
         {/* Payment Form */}
         <div className="bg-white dark:bg-gray-800 rounded-[2rem] shadow-xl shadow-gray-200/40 dark:shadow-none border border-gray-100 dark:border-gray-700 p-6 sm:p-8 mb-6 transition-colors">
           
           <div className="mb-5">
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">
-              {mode === 'escrow' ? t.sellerAddress : t.recipientAddress}
-            </label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                {flow === 'request' ? t.recipientAddress : (mode === 'escrow' ? t.sellerAddress : t.recipientAddress)}
+              </label>
+              {flow === 'request' && isConnected && (
+                <button 
+                  onClick={() => setRecipient(address || '')}
+                  className="text-[10px] font-bold text-celo-green hover:underline"
+                >
+                  {t.useMyAddress}
+                </button>
+              )}
+            </div>
             <input 
               type="text"
               value={recipient}
@@ -441,14 +480,20 @@ function PaymentApp() {
           </div>
 
           <button 
-            onClick={handlePayment}
-            disabled={!isConnected || isPending}
-            className="w-full p-4 bg-gradient-to-r from-[#2AAB66] to-[#F6C644] text-white font-extrabold text-lg rounded-2xl hover:opacity-90 transition-all shadow-lg shadow-celo-green/30 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+            onClick={!isConnected ? () => setShowConnectMenu(true) : handlePayment}
+            disabled={isPending}
+            className={`w-full p-4 text-white font-extrabold text-lg rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-0.5 ${
+              !isConnected 
+                ? 'bg-gray-900 dark:bg-white text-white dark:text-black' 
+                : 'bg-gradient-to-r from-[#2AAB66] to-[#F6C644] shadow-celo-green/30'
+            }`}
           >
-            {isPending ? (
+            {!isConnected ? (
+              <><Wallet size={20} /> {t.connectToPay}</>
+            ) : isPending ? (
               <><Loader2 className="animate-spin text-white" size={24} /> {t.processing}</>
             ) : (
-              t.payWith
+              flow === 'request' ? t.generateLink : t.payWith
             )}
           </button>
           {statusMsg && <p className="text-center font-bold mt-4 text-celo-green text-sm">{statusMsg}</p>}

@@ -35,7 +35,12 @@ export const translations = {
     transUsdc: 'Transferring USDC...',
     waitTrans: 'Waiting for transfer confirmation...',
     errTrans: 'Transfer transaction failed on the blockchain.',
-    txFailed: 'Transaction failed: '
+    txFailed: 'Transaction failed: ',
+    connectToPay: 'Connect Wallet to Pay',
+    requestPayment: 'Request Payment',
+    sendPayment: 'Send Payment',
+    generateLink: 'Generate Link & QR',
+    useMyAddress: 'Use My Address'
   },
   sr: {
     title: 'Celopayer',
@@ -73,7 +78,12 @@ export const translations = {
     transUsdc: 'Prenos USDC...',
     waitTrans: 'Čekanje na potvrdu prenosa...',
     errTrans: 'Transakcija prenosa nije uspela na blokčejnu.',
-    txFailed: 'Transakcija nije uspela: '
+    txFailed: 'Transakcija nije uspela: ',
+    connectToPay: 'Poveži novčanik za plaćanje',
+    requestPayment: 'Zatraži uplatu',
+    sendPayment: 'Pošalji uplatu',
+    generateLink: 'Generiši link i QR',
+    useMyAddress: 'Koristi moju adresu'
   },
   es: {
     title: 'Celopayer',
@@ -111,7 +121,12 @@ export const translations = {
     transUsdc: 'Transfiriendo USDC...',
     waitTrans: 'Esperando confirmación de transferencia...',
     errTrans: 'La transacción de transferencia falló en la cadena de bloques.',
-    txFailed: 'Transacción fallida: '
+    txFailed: 'Transacción fallida: ',
+    connectToPay: 'Conectar Billetera para Pagar',
+    requestPayment: 'Solicitar Pago',
+    sendPayment: 'Enviar Pago',
+    generateLink: 'Generar Enlace y QR',
+    useMyAddress: 'Usar mi Dirección'
   },
   fr: {
     title: 'Celopayer',
@@ -149,7 +164,12 @@ export const translations = {
     transUsdc: 'Transfert USDC...',
     waitTrans: 'En attente de confirmation de transfert...',
     errTrans: 'La transaction de transfert a échoué sur la blockchain.',
-    txFailed: 'La transaction a échoué: '
+    txFailed: 'La transaction a échoué: ',
+    connectToPay: 'Connecter le portefeuille pour payer',
+    requestPayment: 'Demander un paiement',
+    sendPayment: 'Envoyer un paiement',
+    generateLink: 'Générer un lien et un QR',
+    useMyAddress: 'Utiliser mon adresse'
   }
 }
 
