@@ -6,7 +6,7 @@ import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2 } from 'lucide-re
 import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClient } from 'wagmi'
 import { injected } from 'wagmi/connectors'
 import { QRCodeSVG } from 'qrcode.react'
-import { parseUnits } from 'viem'
+import { parseUnits, isAddress } from 'viem'
 import { USDC_ABI, ESCROW_ABI, CONTRACT_ADDRESS, USDC_ADDRESS } from '@/lib/abi'
 
 export default function Home() {
@@ -35,8 +35,12 @@ export default function Home() {
   const total = numAmount + fee
 
   const handlePayment = async () => {
-    if (!recipient || numAmount <= 0) {
-      alert("Please enter a valid recipient address and amount.")
+    if (!recipient || !isAddress(recipient)) {
+      alert("Neispravna wallet adresa! Molim vas unesite validnu adresu koja počinje sa 0x.")
+      return
+    }
+    if (numAmount <= 0) {
+      alert("Molim vas unesite iznos veći od 0 (npr. 0.10).")
       return
     }
 
@@ -179,6 +183,8 @@ export default function Home() {
             <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">Amount (USDC)</label>
             <input 
               type="number"
+              step="0.01"
+              min="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="w-full p-3.5 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-celo-green/30 focus:border-celo-green transition-all text-lg font-semibold"
