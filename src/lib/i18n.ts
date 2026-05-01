@@ -40,7 +40,17 @@ export const translations = {
     requestPayment: 'Request Payment',
     sendPayment: 'Send Payment',
     generateLink: 'Generate Link & QR',
-    useMyAddress: 'Use My Address'
+    useMyAddress: 'Use My Address',
+    scheduled: 'Scheduled',
+    recurring: 'Recurring',
+    every: 'Every',
+    minute: 'Minute',
+    hour: 'Hour',
+    day: 'Day',
+    month: 'Month',
+    dueNow: 'Due Now!',
+    noTasks: 'No scheduled payments yet.',
+    addTask: 'Schedule Payment'
   },
   sr: {
     title: 'Celopayer',
@@ -83,7 +93,17 @@ export const translations = {
     requestPayment: 'Zatraži uplatu',
     sendPayment: 'Pošalji uplatu',
     generateLink: 'Generiši link i QR',
-    useMyAddress: 'Koristi moju adresu'
+    useMyAddress: 'Koristi moju adresu',
+    scheduled: 'Zakazano',
+    recurring: 'Ponavljajuće',
+    every: 'Svaki',
+    minute: 'Minut',
+    hour: 'Sat',
+    day: 'Dan',
+    month: 'Mesec',
+    dueNow: 'Vreme je za uplatu!',
+    noTasks: 'Nema zakazanih uplata.',
+    addTask: 'Zakaži uplatu'
   },
   es: {
     title: 'Celopayer',

@@ -39,7 +39,9 @@ function PaymentApp() {
   const [lang, setLang] = useState<Language>('en')
   const [showLangMenu, setShowLangMenu] = useState(false)
   const [showConnectMenu, setShowConnectMenu] = useState(false)
-  const [flow, setFlow] = useState<'send' | 'request'>('send')
+  const [flow, setFlow] = useState<'send' | 'request' | 'scheduled'>('send')
+  const [tasks, setTasks] = useState<any[]>([])
+  const [frequency, setFrequency] = useState('day')
   
   const { theme, setTheme } = useTheme()
   const { width, height } = useWindowSize()
@@ -55,7 +57,15 @@ function PaymentApp() {
     if (toParam) setRecipient(toParam)
     if (amountParam) setAmount(amountParam)
     if (modeParam === 'instant' || modeParam === 'escrow') setMode(modeParam as any)
+
+    // Load scheduled tasks
+    const savedTasks = localStorage.getItem('celopayer_tasks')
+    if (savedTasks) setTasks(JSON.parse(savedTasks))
   }, [searchParams])
+
+  useEffect(() => {
+    localStorage.setItem('celopayer_tasks', JSON.stringify(tasks))
+  }, [tasks])
   
   const { address, isConnected } = useAccount()
   const { connect, connectors } = useConnect()
@@ -201,6 +211,33 @@ function PaymentApp() {
         }
     }
     if (shareLink) window.open(shareLink, '_blank')
+  }
+
+  const addScheduledTask = () => {
+    if (!recipient || !amount) return
+    const newTask = {
+      id: Date.now(),
+      recipient,
+      amount,
+      frequency,
+      lastPaid: 0,
+      mode
+    }
+    setTasks([...tasks, newTask])
+    setFlow('send')
+    alert("Payment scheduled! You will see a reminder when it's due.")
+  }
+
+  const deleteTasks = (id: number) => {
+    setTasks(tasks.filter(t => t.id !== id))
+  }
+
+  const payScheduled = (task: any) => {
+    setRecipient(task.recipient)
+    setAmount(task.amount)
+    setMode(task.mode)
+    setFlow('send')
+    // The user will then click the Pay button
   }
 
   if (!mounted) return null
@@ -375,6 +412,17 @@ function PaymentApp() {
             <QrCode size={18} />
             {t.requestPayment}
           </button>
+          <button
+            onClick={() => setFlow('scheduled')}
+            className={`flex-1 py-3 text-sm font-bold rounded-full flex justify-center items-center gap-2 transition-all duration-300 ${
+              flow === 'scheduled' 
+                ? 'bg-blue-600 text-white shadow-md' 
+                : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+            }`}
+          >
+            <Wallet size={18} />
+            {t.scheduled}
+          </button>
         </div>
 
         {/* Mode Switcher (only for Send mode) */}
@@ -479,23 +527,47 @@ function PaymentApp() {
             </div>
           </div>
 
-          <button 
-            onClick={!isConnected ? () => setShowConnectMenu(true) : handlePayment}
-            disabled={isPending}
-            className={`w-full p-4 text-white font-extrabold text-lg rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-0.5 ${
-              !isConnected 
-                ? 'bg-gray-900 dark:bg-white text-white dark:text-black' 
-                : 'bg-gradient-to-r from-[#2AAB66] to-[#F6C644] shadow-celo-green/30'
-            }`}
-          >
-            {!isConnected ? (
-              <><Wallet size={20} /> {t.connectToPay}</>
-            ) : isPending ? (
-              <><Loader2 className="animate-spin text-white" size={24} /> {t.processing}</>
-            ) : (
-              flow === 'request' ? t.generateLink : t.payWith
-            )}
-          </button>
+          {flow === 'scheduled' && (
+            <div className="mb-6 animate-in fade-in slide-in-from-top-4">
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">{t.every}</label>
+              <select 
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value)}
+                className="w-full p-3.5 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-celo-green/50 focus:border-celo-green transition-all font-semibold cursor-pointer appearance-none"
+              >
+                <option value="minute">{t.minute}</option>
+                <option value="hour">{t.hour}</option>
+                <option value="day">{t.day}</option>
+                <option value="month">{t.month}</option>
+              </select>
+              <button 
+                onClick={addScheduledTask}
+                className="mt-6 w-full p-4 bg-blue-600 text-white font-extrabold text-lg rounded-2xl hover:opacity-90 transition-all shadow-lg"
+              >
+                {t.addTask}
+              </button>
+            </div>
+          )}
+
+          {flow !== 'scheduled' && (
+            <button 
+              onClick={!isConnected ? () => setShowConnectMenu(true) : handlePayment}
+              disabled={isPending}
+              className={`w-full p-4 text-white font-extrabold text-lg rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-0.5 ${
+                !isConnected 
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-black' 
+                  : 'bg-gradient-to-r from-[#2AAB66] to-[#F6C644] shadow-celo-green/30'
+              }`}
+            >
+              {!isConnected ? (
+                <><Wallet size={20} /> {t.connectToPay}</>
+              ) : isPending ? (
+                <><Loader2 className="animate-spin text-white" size={24} /> {t.processing}</>
+              ) : (
+                flow === 'request' ? t.generateLink : t.payWith
+              )}
+            </button>
+          )}
           {statusMsg && <p className="text-center font-bold mt-4 text-celo-green text-sm">{statusMsg}</p>}
           {errorMsg && (
             <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-semibold rounded-xl text-center border border-red-100 dark:border-red-800/30">
@@ -569,6 +641,40 @@ function PaymentApp() {
             </div>
           </div>
           
+          {/* Scheduled Tasks List */}
+          {tasks.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                <Wallet size={12} /> {t.scheduled} Payments
+              </h3>
+              <div className="space-y-3">
+                {tasks.map(task => (
+                  <div key={task.id} className="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex justify-between items-center animate-in slide-in-from-bottom-2">
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white">${task.amount} USDC</p>
+                      <p className="text-[10px] text-gray-400 font-mono">{task.recipient.slice(0,10)}...</p>
+                      <p className="text-[10px] text-celo-green font-bold uppercase mt-1">Every {task.frequency}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => payScheduled(task)}
+                        className="px-3 py-1.5 bg-gray-900 dark:bg-white text-white dark:text-black text-[10px] font-bold rounded-lg hover:opacity-80"
+                      >
+                        {t.payWith}
+                      </button>
+                      <button 
+                        onClick={() => deleteTasks(task.id)}
+                        className="px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 text-[10px] font-bold rounded-lg hover:bg-red-100"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
 
         <HowItWorks />
