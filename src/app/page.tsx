@@ -11,9 +11,10 @@ import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClien
 import { injected } from 'wagmi/connectors'
 import { QRCodeSVG } from 'qrcode.react'
 import { parseUnits, isAddress } from 'viem'
-import { USDC_ABI, ESCROW_ABI, CONTRACT_ADDRESS, USDC_ADDRESS } from '@/lib/abi'
+import { USDC_ABI, ESCROW_ABI, CONTRACT_ADDRESS, USDC_ADDRESS, TOKENS } from '@/lib/abi'
 import { translations, Language } from '@/lib/i18n'
 import { useTheme } from 'next-themes'
+import { Search, UserPlus, History as HistoryIcon, FileText, X } from 'lucide-react'
 
 export default function Home() {
   return (
@@ -42,6 +43,12 @@ function PaymentApp() {
   const [flow, setFlow] = useState<'send' | 'request' | 'scheduled'>('send')
   const [tasks, setTasks] = useState<any[]>([])
   const [frequency, setFrequency] = useState('day')
+  const [selectedTokenIndex, setSelectedTokenIndex] = useState(0)
+  const [contacts, setContacts] = useState<any[]>([])
+  const [history, setHistory] = useState<any[]>([])
+  const [showContacts, setShowContacts] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+  const [newContact, setNewContact] = useState({ name: '', address: '' })
   
   const { theme, setTheme } = useTheme()
   const { width, height } = useWindowSize()
@@ -58,14 +65,22 @@ function PaymentApp() {
     if (amountParam) setAmount(amountParam)
     if (modeParam === 'instant' || modeParam === 'escrow') setMode(modeParam as any)
 
-    // Load scheduled tasks
+    // Load data
     const savedTasks = localStorage.getItem('celopayer_tasks')
     if (savedTasks) setTasks(JSON.parse(savedTasks))
+    
+    const savedContacts = localStorage.getItem('celopayer_contacts')
+    if (savedContacts) setContacts(JSON.parse(savedContacts))
+    
+    const savedHistory = localStorage.getItem('celopayer_history')
+    if (savedHistory) setHistory(JSON.parse(savedHistory))
   }, [searchParams])
 
   useEffect(() => {
     localStorage.setItem('celopayer_tasks', JSON.stringify(tasks))
-  }, [tasks])
+    localStorage.setItem('celopayer_contacts', JSON.stringify(contacts))
+    localStorage.setItem('celopayer_history', JSON.stringify(history))
+  }, [tasks, contacts, history])
   
   const { address, isConnected } = useAccount()
   const { connect, connectors } = useConnect()
@@ -104,15 +119,18 @@ function PaymentApp() {
     try {
       setStatusMsg(t.processing)
       
-      const usdcDecimals = 6 // Native Celo USDC has 6 decimals
+      const token = TOKENS[selectedTokenIndex]
+      const usdcDecimals = token.decimals
       const parsedAmount = parseUnits(numAmount.toString(), usdcDecimals)
       
+      let txHash = ''
+
       if (mode === 'escrow') {
         const totalWithFee = parseUnits(total.toString(), usdcDecimals)
         
         setStatusMsg(t.apprUsdc)
         const approveHash = await writeContractAsync({
-          address: USDC_ADDRESS,
+          address: token.address,
           abi: USDC_ABI,
           functionName: 'approve',
           args: [CONTRACT_ADDRESS, totalWithFee],
@@ -133,6 +151,7 @@ function PaymentApp() {
           args: [cleanRecipient as `0x${string}`, parsedAmount, BigInt(timeLock)],
         })
         
+        txHash = escrowHash
         setIsConfirming(true)
         setStatusMsg(t.creatEscrow + " (Hash: " + escrowHash.slice(0, 10) + "...)")
         const escrowReceipt = await publicClient?.waitForTransactionReceipt({ hash: escrowHash })
@@ -147,12 +166,13 @@ function PaymentApp() {
       } else {
         setStatusMsg(t.waitTrans)
         const transferHash = await writeContractAsync({
-          address: USDC_ADDRESS,
+          address: token.address,
           abi: USDC_ABI,
           functionName: 'transfer',
           args: [cleanRecipient as `0x${string}`, parsedAmount],
         })
         
+        txHash = transferHash
         setIsConfirming(true)
         setStatusMsg(t.waitTrans + " (Hash: " + transferHash.slice(0, 10) + "...)")
         const transferReceipt = await publicClient?.waitForTransactionReceipt({ hash: transferHash })
@@ -165,6 +185,18 @@ function PaymentApp() {
         setIsConfirming(false)
         setSuccessTx(transferHash)
       }
+
+      // Add to history
+      const newTx = {
+        hash: txHash,
+        amount: numAmount,
+        token: token.symbol,
+        to: cleanRecipient,
+        date: new Date().toISOString(),
+        mode
+      }
+      setHistory([newTx, ...history])
+
     } catch (error: any) {
       console.error(error)
       setStatusMsg('')
@@ -238,6 +270,42 @@ function PaymentApp() {
     setMode(task.mode)
     setFlow('send')
     // The user will then click the Pay button
+  }
+
+  const addContactToList = () => {
+    if (!newContact.name || !newContact.address) return
+    setContacts([...contacts, newContact])
+    setNewContact({ name: '', address: '' })
+  }
+
+  const deleteContact = (addr: string) => {
+    setContacts(contacts.filter(c => c.address !== addr))
+  }
+
+  const selectContact = (c: any) => {
+    setRecipient(c.address)
+    setShowContacts(false)
+  }
+
+  const downloadReceipt = (tx: any) => {
+    const text = `
+CELOPAYER RECEIPT
+-----------------
+Transaction Hash: ${tx.hash}
+Date: ${new Date(tx.date).toLocaleString()}
+Mode: ${tx.mode.toUpperCase()}
+Recipient: ${tx.to}
+Amount: ${tx.amount} ${tx.token}
+Status: CONFIRMED
+-----------------
+Thank you for using Celopayer!
+    `
+    const element = document.createElement("a");
+    const file = new Blob([text], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = `receipt-${tx.hash.slice(0,8)}.txt`;
+    document.body.appendChild(element);
+    element.click();
   }
 
   if (!mounted) return null
@@ -354,6 +422,15 @@ function PaymentApp() {
             </div>
 
             <InstallPWA />
+            
+            <button 
+              onClick={() => setShowHistory(true)}
+              className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+              title={t.history}
+            >
+              <HistoryIcon size={18} />
+            </button>
+
             {isConnected ? (
               <button 
                 onClick={() => disconnect()}
@@ -456,19 +533,46 @@ function PaymentApp() {
         {/* Payment Form */}
         <div className="bg-white dark:bg-gray-800 rounded-[2rem] shadow-xl shadow-gray-200/40 dark:shadow-none border border-gray-100 dark:border-gray-700 p-6 sm:p-8 mb-6 transition-colors">
           
+          <div className="mb-6">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">{t.selectToken}</label>
+            <div className="grid grid-cols-3 gap-2">
+              {TOKENS.map((token, idx) => (
+                <button
+                  key={token.symbol}
+                  onClick={() => setSelectedTokenIndex(idx)}
+                  className={`py-2 text-xs font-bold rounded-xl border transition-all ${
+                    selectedTokenIndex === idx 
+                      ? 'bg-celo-green text-white border-celo-green shadow-md' 
+                      : 'bg-gray-50 dark:bg-gray-900 text-gray-500 border-gray-200 dark:border-gray-700 hover:border-celo-green'
+                  }`}
+                >
+                  {token.symbol}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="mb-5">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 {flow === 'request' ? t.recipientAddress : (mode === 'escrow' ? t.sellerAddress : t.recipientAddress)}
               </label>
-              {flow === 'request' && isConnected && (
+              <div className="flex gap-2">
                 <button 
-                  onClick={() => setRecipient(address || '')}
-                  className="text-[10px] font-bold text-celo-green hover:underline"
+                  onClick={() => setShowContacts(true)}
+                  className="text-[10px] font-bold text-blue-600 hover:underline flex items-center gap-1"
                 >
-                  {t.useMyAddress}
+                  <Search size={10} /> {t.contacts}
                 </button>
-              )}
+                {flow === 'request' && isConnected && (
+                  <button 
+                    onClick={() => setRecipient(address || '')}
+                    className="text-[10px] font-bold text-celo-green hover:underline"
+                  >
+                    {t.useMyAddress}
+                  </button>
+                )}
+              </div>
             </div>
             <input 
               type="text"
@@ -533,12 +637,12 @@ function PaymentApp() {
               <select 
                 value={frequency}
                 onChange={(e) => setFrequency(e.target.value)}
-                className="w-full p-3.5 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-celo-green/50 focus:border-celo-green transition-all font-semibold cursor-pointer appearance-none"
+                className="w-full p-3.5 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:white border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-celo-green/50 focus:border-celo-green transition-all font-semibold cursor-pointer appearance-none"
               >
-                <option value="minute">{t.minute}</option>
-                <option value="hour">{t.hour}</option>
-                <option value="day">{t.day}</option>
-                <option value="month">{t.month}</option>
+                <option value="minute">{t.unitMinute}</option>
+                <option value="hour">{t.unitHour}</option>
+                <option value="day">{t.unitDay}</option>
+                <option value="month">{t.unitMonth}</option>
               </select>
               <button 
                 onClick={addScheduledTask}
@@ -676,6 +780,105 @@ function PaymentApp() {
           )}
 
         </div>
+
+        {/* Modal: Contacts */}
+        {showContacts && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-gray-800 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <UserPlus size={20} className="text-blue-600" /> {t.contacts}
+                </h2>
+                <button onClick={() => setShowContacts(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6">
+                <div className="flex gap-2 mb-6">
+                  <div className="flex-1 space-y-2">
+                    <input 
+                      placeholder={t.name}
+                      value={newContact.name}
+                      onChange={(e) => setNewContact({...newContact, name: e.target.value})}
+                      className="w-full p-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none"
+                    />
+                    <input 
+                      placeholder={t.address}
+                      value={newContact.address}
+                      onChange={(e) => setNewContact({...newContact, address: e.target.value})}
+                      className="w-full p-2 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none font-mono"
+                    />
+                  </div>
+                  <button 
+                    onClick={addContactToList}
+                    className="bg-blue-600 text-white px-4 rounded-xl font-bold text-sm"
+                  >
+                    {t.save}
+                  </button>
+                </div>
+                <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+                  {contacts.map(c => (
+                    <div key={c.address} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-700">
+                      <button onClick={() => selectContact(c)} className="flex-1 text-left">
+                        <p className="text-sm font-bold">{c.name}</p>
+                        <p className="text-[10px] text-gray-400 font-mono">{c.address.slice(0,12)}...</p>
+                      </button>
+                      <button onClick={() => deleteContact(c.address)} className="text-red-500 p-2">
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  {contacts.length === 0 && <p className="text-center text-gray-400 py-8 text-xs">No contacts yet.</p>}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: History */}
+        {showHistory && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-gray-800 w-full max-w-md rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <HistoryIcon size={20} className="text-celo-green" /> {t.history}
+                </h2>
+                <button onClick={() => setShowHistory(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 max-h-[70vh] overflow-y-auto space-y-3">
+                {history.map(tx => (
+                  <div key={tx.hash} className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="text-sm font-black text-gray-900 dark:text-white">{tx.amount} {tx.token}</p>
+                        <p className="text-[10px] text-gray-400">{new Date(tx.date).toLocaleDateString()} • {tx.mode.toUpperCase()}</p>
+                      </div>
+                      <button 
+                        onClick={() => downloadReceipt(tx)}
+                        className="p-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm hover:scale-105 transition-transform"
+                        title={t.downloadReceipt}
+                      >
+                        <FileText size={14} className="text-celo-green" />
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-gray-500 font-mono break-all line-clamp-1">{tx.to}</p>
+                    <a 
+                      href={`https://celoscan.io/tx/${tx.hash}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-2 block text-[9px] font-bold text-celo-green hover:underline"
+                    >
+                      View on Explorer →
+                    </a>
+                  </div>
+                ))}
+                {history.length === 0 && <p className="text-center text-gray-400 py-12 text-xs">{t.noHistory}</p>}
+              </div>
+            </div>
+          </div>
+        )}
 
         <HowItWorks />
 

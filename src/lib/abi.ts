@@ -1,4 +1,4 @@
-export const USDC_ABI = [
+export const ERC20_ABI = [
   {
     "constant": false,
     "inputs": [
@@ -22,10 +22,22 @@ export const USDC_ABI = [
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [{ "name": "account", "type": "address" }],
+    "name": "balanceOf",
+    "outputs": [{ "name": "", "type": "uint256" }],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
   }
 ] as const;
 
+export const USDC_ABI = ERC20_ABI;
+
 export const ESCROW_ABI = [
+  // ... (keeping existing ABI)
 	{
 		"inputs": [
 			{
@@ -304,5 +316,13 @@ export const ESCROW_ABI = [
 ] as const;
 
 export const CONTRACT_ADDRESS: `0x${string}` = '0x1df8a5f2484fc168ab6aa5345f8ebda7201106bc';
-export const USDC_ADDRESS: `0x${string}` = '0x765DE816845861e75A25fCA122bb6898B8B1282a';
 export const TREASURY_ADDRESS: `0x${string}` = '0x6a83a5eb5cf378b65ec20047eac937d5ba09aa5b';
+
+export const TOKENS = [
+  { symbol: 'cUSD', address: '0x765DE816845861e75A25fCA122bb6898B8B1282a' as `0x${string}`, decimals: 18 },
+  { symbol: 'cEUR', address: '0xD8763C931D21d1751bcBF6b597f7e777dB01672E' as `0x${string}`, decimals: 18 },
+  { symbol: 'USDC', address: '0xcebA9300f21970AF0542283e7B8E413945228541' as `0x${string}`, decimals: 6 },
+] as const;
+
+export const USDC_ADDRESS = TOKENS[0].address; // Default to cUSD for backward compatibility
+
