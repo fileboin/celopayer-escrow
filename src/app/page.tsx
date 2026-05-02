@@ -124,12 +124,27 @@ function PaymentApp() {
     const effectiveMode = modeOverride ?? mode
     if (modeOverride) setMode(modeOverride)
     setErrorMsg('')
-    // Extract the raw 0x address from any pasted string or URI
-    const match = recipient.match(/0x[a-fA-F0-9]{40}/i)
-    const cleanRecipient = match ? match[0] : recipient.trim()
     
-    if (!cleanRecipient || !isAddress(cleanRecipient)) {
-      setErrorMsg(t.invalidAddress)
+    // Enhanced address validation
+    let cleanRecipient = recipient.trim()
+    
+    // Extract address from various formats
+    if (cleanRecipient.includes('celopayer:')) {
+      const match = cleanRecipient.match(/0x[a-fA-F0-9]{40}/i)
+      cleanRecipient = match ? match[0] : ''
+    } else if (cleanRecipient.includes('0x')) {
+      const match = cleanRecipient.match(/0x[a-fA-F0-9]{40}/i)
+      cleanRecipient = match ? match[0] : cleanRecipient
+    }
+    
+    // Validate address
+    if (!cleanRecipient) {
+      setErrorMsg('Please enter a wallet address')
+      return
+    }
+    
+    if (!isAddress(cleanRecipient)) {
+      setErrorMsg('Invalid wallet address format. Please check and try again.')
       return
     }
     if (numAmount <= 0) {
@@ -524,16 +539,17 @@ Thank you for using Celopayer!
                 {t.connect}
               </button>
             ) : (
-              <div className="flex items-center gap-2">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="flex items-center gap-2 bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700 px-3 py-2 rounded-full">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="text-sm font-semibold text-green-700 dark:text-green-400">
                   {address?.slice(0, 6)}...{address?.slice(-4)}
                 </div>
                 <button
                   onClick={() => disconnect()}
-                  className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  className="p-1 rounded-full hover:bg-green-200 dark:hover:bg-green-800 transition-colors"
                   title={t.disconnect}
                 >
-                  <Wallet size={16} className="text-gray-600 dark:text-gray-400" />
+                  <Wallet size={14} className="text-green-600 dark:text-green-400" />
                 </button>
               </div>
             )}
