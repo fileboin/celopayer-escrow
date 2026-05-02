@@ -28,6 +28,9 @@ export default function Home() {
 
 function PaymentApp() {
   const searchParams = useSearchParams()
+  const [mounted, setMounted] = useState(false)
+  
+  // Move all state initialization after mounted check
   const [mode, setMode] = useState<'escrow' | 'instant'>('escrow')
   const [recipient, setRecipient] = useState('')
   const [amount, setAmount] = useState('')
@@ -35,7 +38,6 @@ function PaymentApp() {
   const [copied, setCopied] = useState(false)
   const [statusMsg, setStatusMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
-  const [mounted, setMounted] = useState(false)
   const [successTx, setSuccessTx] = useState<string | null>(null)
   const [successMode, setSuccessMode] = useState<'instant' | 'escrow'>('instant')
   const [isConfirming, setIsConfirming] = useState(false)
@@ -58,6 +60,13 @@ function PaymentApp() {
   
   const { theme, setTheme } = useTheme()
   const { width, height } = useWindowSize()
+  
+  // Only use wagmi hooks after mounted
+  const { address, isConnected } = useAccount()
+  const { connect, connectors } = useConnect()
+  const { disconnect } = useDisconnect()
+  const { writeContractAsync, isPending } = useWriteContract()
+  const publicClient = usePublicClient()
   
   useEffect(() => {
     setMounted(true)
@@ -90,11 +99,13 @@ function PaymentApp() {
     localStorage.setItem('celopayer_history', JSON.stringify(history))
   }, [tasks, contacts, history])
   
-  const { address, isConnected } = useAccount()
-  const { connect, connectors } = useConnect()
-  const { disconnect } = useDisconnect()
-  const { writeContractAsync, isPending } = useWriteContract()
-  const publicClient = usePublicClient()
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin text-celo-green" size={48} />
+      </div>
+    )
+  }
 
   const t = translations[lang]
 
