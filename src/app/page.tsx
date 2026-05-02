@@ -557,13 +557,22 @@ Thank you for using Celopayer!
                 <div className="text-sm font-semibold text-green-700 dark:text-green-400">
                   {address?.slice(0, 6)}...{address?.slice(-4)}
                 </div>
-                <button
-                  onClick={() => disconnect()}
-                  className="p-1 rounded-full hover:bg-green-200 dark:hover:bg-green-800 transition-colors"
-                  title={t.disconnect}
-                >
-                  <Wallet size={14} className="text-green-600 dark:text-green-400" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setShowConnectMenu(!showConnectMenu)}
+                    className="p-1 rounded-full hover:bg-green-200 dark:hover:bg-green-800 transition-colors"
+                    title="Switch Wallet"
+                  >
+                    <Wallet size={14} className="text-green-600 dark:text-green-400" />
+                  </button>
+                  <button
+                    onClick={() => disconnect()}
+                    className="p-1 rounded-full hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+                    title={t.disconnect}
+                  >
+                    <X size={14} className="text-red-600 dark:text-red-400" />
+                  </button>
+                </div>
               </div>
             )}
             

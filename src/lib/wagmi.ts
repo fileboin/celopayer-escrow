@@ -8,7 +8,13 @@ export const config = createConfig({
   chains: [celo, celoAlfajores],
   connectors: [
     injected({ 
-      target: 'metaMask', // Prioritize MetaMask/MiniPay
+      target: 'metaMask', // MetaMask
+    }),
+    injected({ 
+      target: 'minipay', // MiniPay wallet
+    }),
+    injected({ 
+      target: 'valor', // Valor wallet
     }),
     walletConnect({ 
       projectId, 
