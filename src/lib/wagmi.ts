@@ -10,15 +10,9 @@ export const config = createConfig({
     injected({ 
       target: 'metaMask', // MetaMask
     }),
-    injected({ 
-      target: 'minipay', // MiniPay wallet
-    }),
-    injected({ 
-      target: 'valor', // Valor wallet
-    }),
     walletConnect({ 
       projectId, 
-      showQrModal: false, // CRITICAL FIX: Disable QR modal on mobile - user will handle connection
+      showQrModal: true, // Enable QR modal for production
     })
   ],
   transports: {
