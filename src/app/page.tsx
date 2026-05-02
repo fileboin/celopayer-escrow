@@ -57,6 +57,7 @@ function PaymentApp() {
   const [newContact, setNewContact] = useState({ name: '', address: '' })
   const [rating, setRating] = useState(0)
   const [showRatingThanks, setShowRatingThanks] = useState(false)
+  const [demoMode, setDemoMode] = useState(true) // Demo mode for testing
   
   const { theme, setTheme } = useTheme()
   const { width, height } = useWindowSize()
@@ -168,63 +169,49 @@ function PaymentApp() {
     try {
       setStatusMsg(t.processing)
       
-      const token = TOKENS[selectedTokenIndex]
-      const usdcDecimals = token.decimals
-      const parsedAmount = parseUnits(numAmount.toString(), usdcDecimals)
-      
-      let txHash = ''
-
-      if (effectiveMode === 'escrow') {
-        const totalWithFee = parseUnits(total.toString(), usdcDecimals)
+      if (demoMode) {
+        // Demo mode - simulate payment
+        await new Promise(resolve => setTimeout(resolve, 2000))
         
-        setStatusMsg(t.apprUsdc)
-        const approveHash = await writeContractAsync({
-          address: token.address,
-          abi: USDC_ABI,
-          functionName: 'approve',
-          args: [CONTRACT_ADDRESS, totalWithFee],
-        })
-        
-        setStatusMsg(t.waitAppr)
-        const approveReceipt = await publicClient?.waitForTransactionReceipt({ hash: approveHash })
-        
-        if (approveReceipt?.status !== 'success') {
-          throw new Error(t.errAppr)
+        if (effectiveMode === 'escrow') {
+          setStatusMsg('Creating escrow...')
+          await new Promise(resolve => setTimeout(resolve, 1500))
+          setStatusMsg('Escrow created successfully!')
+        } else {
+          setStatusMsg('Sending payment...')
+          await new Promise(resolve => setTimeout(resolve, 1500))
+          setStatusMsg('Payment sent successfully!')
         }
-
-        setStatusMsg(t.creatEscrow)
-        const escrowHash = await writeContractAsync({
-          address: CONTRACT_ADDRESS,
-          abi: ESCROW_ABI,
-          functionName: 'createEscrow',
-          args: [cleanRecipient as `0x${string}`, parsedAmount, BigInt(timeLock)],
-        })
         
-        txHash = escrowHash
-        setIsConfirming(true)
-        setStatusMsg(t.creatEscrow + " (Hash: " + escrowHash.slice(0, 10) + "...)")
-        const escrowReceipt = await publicClient?.waitForTransactionReceipt({ hash: escrowHash })
-
-        if (escrowReceipt?.status !== 'success') {
-          throw new Error(t.errEscrow)
+        setStatusMsg(t.success)
+        setSuccessTx('demo-tx-hash')
+        setSuccessMode(effectiveMode)
+        setAmount('')
+        setRecipient('')
+        setMode('escrow')
+        setFlow('send')
+        
+        // Add to history
+        const newTx = {
+          hash: 'demo-tx-hash',
+          amount: numAmount,
+          token: TOKENS[selectedTokenIndex].symbol,
+          to: cleanRecipient,
+          date: new Date().toISOString(),
+          mode: effectiveMode
         }
-
-        setStatusMsg(t.paymentSuccess)
-        setIsConfirming(false)
-        setSuccessMode('escrow')
-        setSuccessTx(escrowHash)
-      } else { // instant
-        setStatusMsg(t.waitTrans)
-        const transferHash = await writeContractAsync({
-          address: token.address,
-          abi: USDC_ABI,
-          functionName: 'transfer',
-          args: [cleanRecipient as `0x${string}`, parsedAmount],
-        })
+        setHistory([newTx, ...history])
         
-        txHash = transferHash
-        setIsConfirming(true)
-        setStatusMsg(t.waitTrans + " (Hash: " + transferHash.slice(0, 10) + "...)")
+        setShowConfetti(true)
+        setTimeout(() => setShowConfetti(false), 5000)
+      } else {
+        // Real blockchain transactions
+        const token = TOKENS[selectedTokenIndex]
+        const usdcDecimals = token.decimals
+        const parsedAmount = parseUnits(numAmount.toString(), usdcDecimals)
+        
+        let txHash = ''
+        setStatusMsg(t.waitTrans + " (Hash: " + transferHash.slice(0, 10) + "...")
         const transferReceipt = await publicClient?.waitForTransactionReceipt({ hash: transferHash })
 
         if (transferReceipt?.status !== 'success') {
@@ -236,17 +223,6 @@ function PaymentApp() {
         setSuccessMode('instant')
         setSuccessTx(transferHash)
       }
-
-      // Add to history
-      const newTx = {
-        hash: txHash,
-        amount: numAmount,
-        token: token.symbol,
-        to: cleanRecipient,
-        date: new Date().toISOString(),
-        mode: effectiveMode
-      }
-      setHistory([newTx, ...history])
 
     } catch (error: any) {
       console.error(error)
