@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bluetooth, BluetoothOff, Send, Receive, Loader2, CheckCircle, XCircle, Smartphone } from 'lucide-react'
+import { Bluetooth, BluetoothOff, Send, Download, Loader2, CheckCircle, XCircle, Smartphone } from 'lucide-react'
 import { bluetoothService, BluetoothDevice, BluetoothPaymentRequest, BluetoothPaymentResponse } from '@/lib/bluetooth'
 
 interface BluetoothPaymentProps {
@@ -112,7 +112,7 @@ export function BluetoothPayment({
     }
   }
 
-  const handleReceivePayment = async () => {
+  const handleDownloadPayment = async () => {
     if (!isConnected) return
     
     setIsReceiving(true)
@@ -202,12 +202,12 @@ export function BluetoothPayment({
           </button>
           
           <button
-            onClick={handleReceivePayment}
+            onClick={handleDownloadPayment}
             disabled={isReceiving}
             className="flex items-center justify-center gap-2 py-3 px-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
           >
-            {isReceiving ? <Loader2 className="animate-spin" size={16} /> : <Receive size={16} />}
-            {isReceiving ? 'Receiving...' : 'Receive Payment'}
+            {isReceiving ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
+            {isReceiving ? 'Receiving...' : 'Download Payment'}
           </button>
         </div>
       )}
