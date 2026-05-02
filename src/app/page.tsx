@@ -57,7 +57,7 @@ function PaymentApp() {
   const [newContact, setNewContact] = useState({ name: '', address: '' })
   const [rating, setRating] = useState(0)
   const [showRatingThanks, setShowRatingThanks] = useState(false)
-  const [demoMode, setDemoMode] = useState(true) // Demo mode for testing
+  const [showConfetti, setShowConfetti] = useState(false)
   
   const { theme, setTheme } = useTheme()
   const { width, height } = useWindowSize()
