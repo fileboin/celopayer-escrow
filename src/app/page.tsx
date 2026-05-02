@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { InstallPWA } from '@/components/InstallPWA'
 import { HowItWorks } from '@/components/HowItWorks'
 import { BluetoothPayment } from '@/components/BluetoothPayment'
-import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2, Moon, Sun, Globe, QrCode, Share2, Send, MessageCircle, Mail } from 'lucide-react'
+import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2, Moon, Sun, Globe, QrCode, Share2, Send, MessageCircle, Mail, Palette, Smartphone } from 'lucide-react'
 import Confetti from 'react-confetti'
 import { useWindowSize } from 'react-use'
 import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClient } from 'wagmi'
@@ -430,80 +430,112 @@ Thank you for using Celopayer!
               <ShieldAlert size={18} className="text-celo-green" />
             </a>
 
-            {/* Telegram Bot Link */}
-            <a 
-              href={`https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'volegram-celopay'}`}
-              target="_blank"
-              rel="noreferrer"
-              className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
-              title="Telegram Bot"
-            >
-              <MessageCircle size={18} className="text-[#0088cc]" />
-            </a>
-
-            {/* Language Selector */}
             <div className="relative">
-              <button 
+              <button
                 onClick={() => setShowLangMenu(!showLangMenu)}
-                className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center gap-1"
+                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                title={t.changeLanguage}
               >
-                <Globe size={18} />
-                <span className="text-xs font-bold uppercase">{lang}</span>
+                <Globe size={20} className="text-gray-600 dark:text-gray-400" />
               </button>
               {showLangMenu && (
-                <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden">
-                  {(Object.keys(translations) as Language[]).map(l => (
+                <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                  {(['en', 'sr', 'es', 'fr'] as Language[]).map(l => (
                     <button
                       key={l}
                       onClick={() => { setLang(l); setShowLangMenu(false) }}
-                      className={`w-full text-left px-4 py-2 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 ${lang === l ? 'text-celo-green' : 'text-gray-700 dark:text-gray-200'}`}
+                      className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-xl last:rounded-b-xl transition-colors ${
+                        lang === l ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
+                      }`}
                     >
-                      {l === 'en' ? 'English' : l === 'sr' ? 'Srpski' : l === 'es' ? 'Español' : 'Français'}
+                      {l === 'en' ? 'English' : l === 'sr' ? 'Српски' : l === 'es' ? 'Español' : 'Français'}
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            <InstallPWA />
-            
-            <button 
-              onClick={() => setShowHistory(true)}
-              className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
-              title={t.history}
-            >
-              <HistoryIcon size={18} />
-            </button>
-
-            {isConnected ? (
-              <button 
-                onClick={() => disconnect()}
-                className="text-sm font-bold px-4 py-2 rounded-full bg-white dark:bg-gray-800 text-black dark:text-white border border-gray-200 dark:border-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+            {/* Enhanced Theme Switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setShowLangMenu(false)}
+                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                title="Change Theme"
               >
-                {address?.slice(0, 6)}...{address?.slice(-4)}
+                <Palette size={20} className="text-gray-600 dark:text-gray-400" />
+              </button>
+              <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                <button
+                  onClick={() => setTheme('celo-yellow')}
+                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-xl transition-colors ${
+                    theme === 'celo-yellow' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  🌞 Celo Yellow
+                </button>
+                <button
+                  onClick={() => setTheme('celo-modern')}
+                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                    theme === 'celo-modern' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  🌙 Modern Dark
+                </button>
+                <button
+                  onClick={() => setTheme('light')}
+                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                    theme === 'light' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  ☀️ Light
+                </button>
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 last:rounded-b-xl transition-colors ${
+                    theme === 'dark' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  🌙 Dark
+                </button>
+              </div>
+            </div>
+            
+            {/* Connect Wallet */}
+            {!isConnected ? (
+              <button
+                onClick={() => setShowConnectMenu(!showConnectMenu)}
+                className="flex items-center gap-2 bg-celo-green hover:bg-celo-green-dark text-white font-bold py-2 px-4 rounded-full transition-all transform hover:scale-105"
+              >
+                <Wallet size={16} />
+                {t.connect}
               </button>
             ) : (
-              <div className="relative">
-                <button 
-                  onClick={() => setShowConnectMenu(!showConnectMenu)}
-                  className="px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black font-bold rounded-full hover:bg-gray-800 dark:hover:bg-gray-200 transition-all shadow-md flex items-center gap-2 text-sm"
+              <div className="flex items-center gap-2">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {address?.slice(0, 6)}...{address?.slice(-4)}
+                </div>
+                <button
+                  onClick={() => disconnect()}
+                  className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  title={t.disconnect}
                 >
-                  <Wallet size={16} />
-                  {t.connect}
+                  <Wallet size={16} className="text-gray-600 dark:text-gray-400" />
                 </button>
-                {showConnectMenu && (
-                  <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 z-50 overflow-hidden">
-                    {connectors.map(connector => (
-                      <button
-                        key={connector.uid}
-                        onClick={() => { connect({ connector }); setShowConnectMenu(false) }}
-                        className="w-full text-left px-4 py-3 text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border-b border-gray-50 dark:border-gray-700 last:border-0"
-                      >
-                        {connector.name === 'Injected' ? 'Browser / MiniPay' : connector.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
+              </div>
+            )}
+            
+            {/* Connect Menu */}
+            {showConnectMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                {connectors.map((connector) => (
+                  <button
+                    key={connector.id}
+                    onClick={() => { connect({ connector }); setShowConnectMenu(false) }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-xl last:rounded-b-xl transition-colors text-gray-700 dark:text-gray-300"
+                  >
+                    {connector.name === 'Injected' ? 'Browser / MiniPay' : connector.name}
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -760,7 +792,7 @@ Thank you for using Celopayer!
             </h3>
             <div className="p-3 bg-white border border-gray-200 shadow-sm rounded-2xl mb-4 transition-colors">
               <QRCodeSVG 
-                value={getShareUrl() || recipient.match(/0x[a-fA-F0-9]{40}/i)?.[0] || recipient || '0x'} 
+                value={getShareUrl() || `celopayer:${recipient || '0x'}?amount=${amount || '0'}&mode=${mode}&token=${TOKENS[selectedTokenIndex].symbol}`} 
                 size={140} 
                 fgColor="#171717"
               />
@@ -855,8 +887,71 @@ Thank you for using Celopayer!
 
         </div>
 
-        {/* Bluetooth Payment Section */}
-        <div className="mt-6">
+        {/* Quick Actions Section */}
+        <div className="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-purple-200 dark:border-purple-800">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <Zap size={20} className="text-purple-600" />
+            Quick Actions
+          </h3>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => {
+                setRecipient(address || '')
+                setAmount('10')
+                setMode('instant')
+                setFlow('send')
+              }}
+              className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+            >
+              <div className="text-purple-600 dark:text-purple-400 font-bold text-sm">Quick Send $10</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">To my address</div>
+            </button>
+            <button
+              onClick={() => {
+                setRecipient(address || '')
+                setAmount('25')
+                setMode('escrow')
+                setFlow('request')
+              }}
+              className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+            >
+              <div className="text-purple-600 dark:text-purple-400 font-bold text-sm">Request $25</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Escrow payment</div>
+            </button>
+            <button
+              onClick={() => {
+                setFlow('scheduled')
+                setFrequency('week')
+              }}
+              className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+            >
+              <div className="text-purple-600 dark:text-purple-400 font-bold text-sm">Schedule</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">Recurring payment</div>
+            </button>
+            <button
+              onClick={() => setShowHistory(true)}
+              className="p-3 bg-white dark:bg-gray-800 rounded-xl border border-purple-200 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+            >
+              <div className="text-purple-600 dark:text-purple-400 font-bold text-sm">History</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">View transactions</div>
+            </button>
+          </div>
+        </div>
+
+        {/* Enhanced Bluetooth Payment Section */}
+        <div className="mt-6 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Smartphone size={20} className="text-blue-600" />
+              Bluetooth Payments
+            </h3>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full font-semibold">
+                NEW
+              </span>
+            </div>
+          </div>
+          
           <BluetoothPayment 
             recipient={recipient}
             amount={amount}
@@ -868,6 +963,7 @@ Thank you for using Celopayer!
               setAmount(request.amount)
               setMode(request.mode)
               if (request.timeLock) setTimeLock(request.timeLock)
+              setStatusMsg('Bluetooth payment request received!')
             }}
             onPaymentResponse={(response) => {
               if (response.status === 'accepted' && response.transactionHash) {

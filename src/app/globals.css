@@ -34,6 +34,52 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Custom Yellow Theme */
+.celo-yellow {
+  --background: #FBCC5C;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #35D07F;
+  --primary-foreground: #ffffff;
+  --secondary: #FCE196;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f5f5f5;
+  --muted-foreground: #666666;
+  --accent: #35D07F;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e5e5e5;
+  --input: #ffffff;
+  --ring: #35D07F;
+}
+
+/* Modern Theme */
+.celo-modern {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --popover: #1e293b;
+  --popover-foreground: #f1f5f9;
+  --primary: #10b981;
+  --primary-foreground: #ffffff;
+  --secondary: #334155;
+  --secondary-foreground: #f1f5f9;
+  --muted: #475569;
+  --muted-foreground: #94a3b8;
+  --accent: #10b981;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #334155;
+  --input: #1e293b;
+  --ring: #10b981;
+}
+
 @keyframes pulse-subtle {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.9; transform: scale(1.01); }
@@ -41,4 +87,29 @@ body {
 
 .animate-pulse-subtle {
   animation: pulse-subtle 2s infinite ease-in-out;
+}
+
+/* Enhanced button styles for yellow theme */
+.celo-yellow .bg-blue-600 {
+  background-color: #35D07F !important;
+}
+
+.celo-yellow .bg-blue-700:hover {
+  background-color: #2AAB66 !important;
+}
+
+.celo-yellow .bg-green-600 {
+  background-color: #35D07F !important;
+}
+
+.celo-yellow .bg-green-700:hover {
+  background-color: #2AAB66 !important;
+}
+
+.celo-yellow .bg-celo-green {
+  background-color: #35D07F !important;
+}
+
+.celo-yellow .hover\:bg-celo-green-dark:hover {
+  background-color: #2AAB66 !important;
 }
