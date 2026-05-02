@@ -42,6 +42,7 @@ function PaymentApp() {
   
   const [lang, setLang] = useState<Language>('en')
   const [showLangMenu, setShowLangMenu] = useState(false)
+  const [showThemeMenu, setShowThemeMenu] = useState(false)
   const [showConnectMenu, setShowConnectMenu] = useState(false)
   const [flow, setFlow] = useState<'send' | 'request' | 'scheduled'>('send')
   const [tasks, setTasks] = useState<any[]>([])
@@ -458,46 +459,48 @@ Thank you for using Celopayer!
             {/* Enhanced Theme Switcher */}
             <div className="relative">
               <button
-                onClick={() => setShowLangMenu(false)}
+                onClick={() => setShowThemeMenu(!showThemeMenu)}
                 className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 title="Change Theme"
               >
                 <Palette size={20} className="text-gray-600 dark:text-gray-400" />
               </button>
-              <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                <button
-                  onClick={() => setTheme('celo-yellow')}
-                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-xl transition-colors ${
-                    theme === 'celo-yellow' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  🌞 Celo Yellow
-                </button>
-                <button
-                  onClick={() => setTheme('celo-modern')}
-                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                    theme === 'celo-modern' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  🌙 Modern Dark
-                </button>
-                <button
-                  onClick={() => setTheme('light')}
-                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                    theme === 'light' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  ☀️ Light
-                </button>
-                <button
-                  onClick={() => setTheme('dark')}
-                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 last:rounded-b-xl transition-colors ${
-                    theme === 'dark' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  🌙 Dark
-                </button>
-              </div>
+              {showThemeMenu && (
+                <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                  <button
+                    onClick={() => { setTheme('celo-yellow'); setShowThemeMenu(false) }}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-xl transition-colors ${
+                      theme === 'celo-yellow' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    🌞 Celo Yellow
+                  </button>
+                  <button
+                    onClick={() => { setTheme('celo-modern'); setShowThemeMenu(false) }}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                      theme === 'celo-modern' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    🌙 Modern Dark
+                  </button>
+                  <button
+                    onClick={() => { setTheme('light'); setShowThemeMenu(false) }}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                      theme === 'light' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    ☀️ Light
+                  </button>
+                  <button
+                    onClick={() => { setTheme('dark'); setShowThemeMenu(false) }}
+                    className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 last:rounded-b-xl transition-colors ${
+                      theme === 'dark' ? 'bg-celo-green text-white' : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    🌙 Dark
+                  </button>
+                </div>
+              )}
             </div>
             
             {/* Connect Wallet */}
