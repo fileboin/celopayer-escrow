@@ -90,26 +90,63 @@ body {
 }
 
 /* Enhanced button styles for yellow theme */
-.celo-yellow .bg-blue-600 {
-  background-color: #35D07F !important;
+.celo-yellow {
+  background: linear-gradient(135deg, #FBCC5C 0%, #FCE196 100%);
 }
 
-.celo-yellow .bg-blue-700:hover {
-  background-color: #2AAB66 !important;
-}
-
-.celo-yellow .bg-green-600 {
-  background-color: #35D07F !important;
-}
-
-.celo-yellow .bg-green-700:hover {
-  background-color: #2AAB66 !important;
-}
-
+.celo-yellow .bg-blue-600,
+.celo-yellow .bg-green-600,
 .celo-yellow .bg-celo-green {
-  background-color: #35D07F !important;
+  background: linear-gradient(135deg, #35D07F 0%, #2AAB66 100%) !important;
+  border: 2px solid #2AAB66 !important;
+  box-shadow: 0 4px 15px rgba(53, 208, 127, 0.3) !important;
+  transition: all 0.3s ease !important;
 }
 
+.celo-yellow .bg-blue-600:hover,
+.celo-yellow .bg-green-600:hover,
+.celo-yellow .bg-celo-green:hover,
 .celo-yellow .hover\:bg-celo-green-dark:hover {
-  background-color: #2AAB66 !important;
+  background: linear-gradient(135deg, #2AAB66 0%, #249558 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(53, 208, 127, 0.4) !important;
+}
+
+.celo-yellow .bg-gray-900,
+.celo-yellow .bg-black {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
+  border: 2px solid #2d2d2d !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+.celo-yellow .bg-gray-900:hover,
+.celo-yellow .bg-black:hover {
+  background: linear-gradient(135deg, #2d2d2d 0%, #404040 100%) !important;
+  transform: translateY(-2px) !important;
+}
+
+.celo-yellow .bg-white {
+  background: #ffffff !important;
+  border: 2px solid #e5e5e5 !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.celo-yellow .bg-white:hover {
+  background: #f9f9f9 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Modern button animations */
+@keyframes buttonPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.celo-yellow button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.celo-yellow button:hover {
+  animation: buttonPulse 0.6s ease-in-out !important;
 }

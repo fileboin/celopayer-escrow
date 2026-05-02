@@ -620,25 +620,29 @@ Thank you for using Celopayer!
               </button>
             </div>
 
-            {/* Pay buttons — prominently placed below the toggle */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            {/* Modern Pay buttons */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <button
                 id="btn-pay-escrow"
                 onClick={() => !isConnected ? setShowConnectMenu(true) : handlePayment('escrow')}
                 disabled={isPending}
-                className="flex items-center justify-center gap-2 py-4 px-3 bg-gray-900 dark:bg-white hover:bg-gray-700 dark:hover:bg-gray-100 active:scale-95 text-white dark:text-black font-black rounded-2xl shadow-lg border-b-4 border-gray-700 dark:border-gray-300 transition-all text-sm"
+                className="group relative flex items-center justify-center gap-3 py-5 px-4 bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white font-black rounded-2xl shadow-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl text-sm border-2 border-gray-800"
               >
-                <ShieldAlert size={18} />
-                {t.payEscrow}
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <ShieldAlert size={20} className="relative z-10" />
+                <span className="relative z-10">{t.payEscrow}</span>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
               </button>
               <button
                 id="btn-pay-instant"
                 onClick={() => !isConnected ? setShowConnectMenu(true) : handlePayment('instant')}
                 disabled={isPending}
-                className="flex items-center justify-center gap-2 py-4 px-3 bg-[#2AAB66] hover:bg-[#249558] active:scale-95 text-white font-black rounded-2xl shadow-lg shadow-green-500/30 border-b-4 border-[#1e7a48] transition-all text-sm"
+                className="group relative flex items-center justify-center gap-3 py-5 px-4 bg-gradient-to-r from-celo-green to-green-600 hover:from-green-600 hover:to-green-700 text-white font-black rounded-2xl shadow-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl text-sm border-2 border-green-700"
               >
-                <Zap size={18} />
-                {t.payInstant}
+                <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-green-700 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <Zap size={20} className="relative z-10" />
+                <span className="relative z-10">{t.payInstant}</span>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
               </button>
             </div>
           </>
@@ -713,26 +717,53 @@ Thank you for using Celopayer!
             />
           </div>
 
-          {/* NEW PROMINENT PAYMENT BUTTON (MOVED UP) */}
+          {/* Enhanced Main Payment Button */}
           {flow !== 'scheduled' && (
-            <button 
-              onClick={!isConnected ? () => setShowConnectMenu(true) : handlePayment}
-              disabled={isPending}
-              id="main-payment-button-top"
-              className={`w-full mb-6 p-5 text-white font-black text-xl rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 transform active:scale-95 animate-pulse-subtle ${
+            <div className="relative mb-8">
+              <button 
+                onClick={!isConnected ? () => setShowConnectMenu(true) : handlePayment}
+                disabled={isPending}
+                id="main-payment-button-top"
+                className={`group relative w-full p-6 text-white font-black text-xl rounded-3xl transition-all duration-300 shadow-2xl flex items-center justify-center gap-4 transform hover:scale-105 border-4 ${
+                  !isConnected 
+                    ? 'bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 border-gray-800 shadow-gray-900/50' 
+                    : 'bg-gradient-to-r from-celo-green to-green-600 hover:from-green-600 hover:to-green-700 border-green-700 shadow-green-500/50'
+                }`}
+              >
+                <div className={`absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+                  !isConnected 
+                    ? 'bg-gradient-to-r from-gray-800 to-gray-900' 
+                    : 'bg-gradient-to-r from-green-600 to-green-700'
+                }`}></div>
+                
+                {!isConnected ? (
+                  <>
+                    <Wallet size={28} className="relative z-10" />
+                    <span className="relative z-10">{t.connectToPay}</span>
+                    <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
+                  </>
+                ) : isPending ? (
+                  <>
+                    <Loader2 className="animate-spin text-white relative z-10" size={28} />
+                    <span className="relative z-10">{t.processing}</span>
+                    <div className="absolute -top-2 -right-2 w-4 h-4 bg-yellow-500 rounded-full animate-pulse"></div>
+                  </>
+                ) : (
+                  <>
+                    <Zap size={28} className="relative z-10" />
+                    <span className="relative z-10">{flow === 'request' ? t.generateLink : (mode === 'escrow' ? t.payWith : t.sendPayment)}</span>
+                    <div className="absolute -top-2 -right-2 w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
+                  </>
+                )}
+              </button>
+              
+              {/* Glow effect */}
+              <div className={`absolute inset-0 rounded-3xl blur-xl opacity-50 ${
                 !isConnected 
-                  ? 'bg-gray-900 dark:bg-white text-white dark:text-black' 
-                  : 'bg-[#2AAB66] hover:bg-[#249558] shadow-celo-green/40 border-b-4 border-[#1e7a48]'
-              }`}
-            >
-              {!isConnected ? (
-                <><Wallet size={24} /> {t.connectToPay}</>
-              ) : isPending ? (
-                <><Loader2 className="animate-spin text-white" size={24} /> {t.processing}</>
-              ) : (
-                <><Zap size={24} /> {flow === 'request' ? t.generateLink : (mode === 'escrow' ? t.payWith : t.sendPayment)}</>
-              )}
-            </button>
+                  ? 'bg-gray-900' 
+                  : 'bg-green-500'
+              } -z-10`}></div>
+            </div>
           )}
 
           {mode === 'escrow' && (
@@ -799,14 +830,36 @@ Thank you for using Celopayer!
             </div>
           )}
 
-          {/* Persistent QR Code Section */}
+          {/* Enhanced QR Code Section */}
           <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 flex flex-col items-center">
             <h3 className="font-semibold text-gray-500 dark:text-gray-400 mb-4 text-xs uppercase tracking-wider flex items-center gap-2">
               <QrCode size={14} /> {t.scanToPay}
             </h3>
+            
+            {/* Payment Details Display */}
+            {(recipient || amount) && (
+              <div className="mb-4 p-4 bg-gradient-to-r from-celo-green/10 to-celo-yellow/10 border border-celo-green/20 rounded-xl text-center">
+                <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  {amount && (
+                    <div className="text-2xl font-bold text-celo-green">
+                      ${amount} {TOKENS[selectedTokenIndex].symbol}
+                    </div>
+                  )}
+                  {recipient && (
+                    <div className="text-xs font-mono text-gray-600 dark:text-gray-400 mt-1">
+                      {recipient.slice(0, 6)}...{recipient.slice(-4)}
+                    </div>
+                  )}
+                  <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                    {mode === 'escrow' ? 'Escrow Payment' : 'Instant Payment'}
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="p-3 bg-white border border-gray-200 shadow-sm rounded-2xl mb-4 transition-colors">
               <QRCodeSVG 
-                value={getShareUrl() || `celopayer:${recipient || '0x'}?amount=${amount || '0'}&mode=${mode}&token=${TOKENS[selectedTokenIndex].symbol}`} 
+                value={getShareUrl() || `celopayer:${recipient || '0x0000000000000000000000000000000000000000'}?amount=${amount || '0'}&mode=${mode}&token=${TOKENS[selectedTokenIndex].symbol}`} 
                 size={140} 
                 fgColor="#171717"
               />
