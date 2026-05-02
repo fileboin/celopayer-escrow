@@ -9,6 +9,28 @@ import { formatUnits } from 'viem'
 import Link from 'next/link'
 import { translations } from '@/lib/i18n'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
+// Wrapper component to ensure client-side only rendering
+function AdminWrapper() {
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-celo-green"></div>
+      </div>
+    )
+  }
+
+  return <AdminPageContent />
+}
+
 type Escrow = {
   id: number
   buyer: string
@@ -18,7 +40,7 @@ type Escrow = {
   state: number // 0: Created, 1: Locked, 2: Disputed, 3: Released, 4: Refunded
 }
 
-export default function AdminPage() {
+function AdminPageContent() {
   const { address, isConnected } = useAccount()
   const { connect, connectors } = useConnect()
   const { disconnect } = useDisconnect()
@@ -37,6 +59,14 @@ export default function AdminPage() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-celo-green"></div>
+      </div>
+    )
+  }
 
   const isAdmin = isConnected && address?.toLowerCase() === TREASURY_ADDRESS.toLowerCase()
 
@@ -271,3 +301,5 @@ export default function AdminPage() {
     </main>
   )
 }
+
+export default AdminWrapper
