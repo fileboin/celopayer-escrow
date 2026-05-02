@@ -115,6 +115,19 @@ function PaymentApp() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // Generate invoice URL
+  const generateInvoiceUrl = () => {
+    const baseUrl = window.location.origin
+    const params = new URLSearchParams()
+    
+    if (recipient) params.append('to', recipient)
+    if (amount) params.append('amount', amount)
+    if (mode) params.append('mode', mode)
+    
+    const paramString = params.toString()
+    return paramString ? `${baseUrl}?${paramString}` : baseUrl
+  }
+
   // Fees calculation
   const numAmount = parseFloat(amount) || 0
   const fee = mode === 'escrow' ? numAmount * 0.005 : 0
@@ -869,6 +882,24 @@ Thank you for using Celopayer!
                   <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                     {mode === 'escrow' ? 'Escrow Payment' : 'Instant Payment'}
                   </div>
+                </div>
+                
+                {/* Invoice Buttons */}
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  <button
+                    onClick={() => navigator.clipboard.writeText(generateInvoiceUrl())}
+                    className="flex items-center justify-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-xs font-semibold text-gray-700 dark:text-gray-300"
+                  >
+                    <FileText size={12} />
+                    Copy Invoice
+                  </button>
+                  <button
+                    onClick={() => window.open(generateInvoiceUrl(), '_blank')}
+                    className="flex items-center justify-center gap-2 bg-celo-green hover:bg-celo-green-dark text-white py-2 px-3 rounded-lg transition-all text-xs font-semibold"
+                  >
+                    <Share2 size={12} />
+                    Share Invoice
+                  </button>
                 </div>
               </div>
             )}
