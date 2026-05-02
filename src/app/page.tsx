@@ -5,6 +5,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { InstallPWA } from '@/components/InstallPWA'
 import { HowItWorks } from '@/components/HowItWorks'
+import { BluetoothPayment } from '@/components/BluetoothPayment'
 import { Wallet, ShieldAlert, Zap, Copy, CheckCircle2, Loader2, Moon, Sun, Globe, QrCode, Share2, Send, MessageCircle, Mail } from 'lucide-react'
 import Confetti from 'react-confetti'
 import { useWindowSize } from 'react-use'
@@ -215,9 +216,9 @@ function PaymentApp() {
       // Improve error readability
       let errMsg = error.shortMessage || error.message
       if (errMsg.includes('insufficient funds') || errMsg.includes('exceeds balance')) {
-        errMsg = "Nedovoljno sredstava (potreban USDC i malo CELO tokena za proviziju mreže)."
+        errMsg = "Insufficient funds (USDC and a small amount of CELO tokens for network fees required)."
       } else if (errMsg.includes('User rejected')) {
-        errMsg = "Transakcija je odbijena u novčaniku."
+        errMsg = "Transaction rejected in wallet."
       }
       
       setErrorMsg(t.txFailed + errMsg)
@@ -852,6 +853,32 @@ Thank you for using Celopayer!
             </div>
           )}
 
+        </div>
+
+        {/* Bluetooth Payment Section */}
+        <div className="mt-6">
+          <BluetoothPayment 
+            recipient={recipient}
+            amount={amount}
+            token={TOKENS[selectedTokenIndex].symbol}
+            mode={mode}
+            timeLock={timeLock}
+            onPaymentRequest={(request) => {
+              setRecipient(request.recipient)
+              setAmount(request.amount)
+              setMode(request.mode)
+              if (request.timeLock) setTimeLock(request.timeLock)
+            }}
+            onPaymentResponse={(response) => {
+              if (response.status === 'accepted' && response.transactionHash) {
+                setStatusMsg('Bluetooth payment successful!')
+                setSuccessTx(response.transactionHash)
+                setSuccessMode(mode)
+              } else if (response.status === 'error') {
+                setErrorMsg(response.error || 'Bluetooth payment failed')
+              }
+            }}
+          />
         </div>
 
         {/* Modal: Contacts */}

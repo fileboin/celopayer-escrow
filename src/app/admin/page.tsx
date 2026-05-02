@@ -93,10 +93,10 @@ export default function AdminPage() {
       })
       await publicClient?.waitForTransactionReceipt({ hash })
       await loadEscrows()
-      alert("Spor uspešno rešen!")
+      alert("Dispute resolved successfully!")
     } catch (error: any) {
       console.error(error)
-      alert("Greška: " + (error.shortMessage || error.message))
+      alert("Error: " + (error.shortMessage || error.message))
     } finally {
       setProcessingId(null)
     }
@@ -170,23 +170,23 @@ export default function AdminPage() {
         {!isConnected ? (
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-sm border border-gray-100 dark:border-gray-700">
             <ShieldAlert size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Poveži Admin Novčanik</h2>
-            <p className="text-gray-500 dark:text-gray-400">Da bi pristupio kontrolnoj tabli za rešavanje sporova, moraš povezati Treasury adresu.</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Connect Admin Wallet</h2>
+            <p className="text-gray-500 dark:text-gray-400">To access the dispute resolution dashboard, you must connect the Treasury address.</p>
           </div>
         ) : !isAdmin ? (
           <div className="bg-red-50 dark:bg-red-900/20 rounded-2xl p-12 text-center shadow-sm border border-red-100 dark:border-red-800/30">
-            <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Pristup Odbijen</h2>
-            <p className="text-red-500 dark:text-red-300">Povezana adresa ({address}) nije glavna Treasury adresa. Samo gazda može da rešava sporove.</p>
+            <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Access Denied</h2>
+            <p className="text-red-500 dark:text-red-300">Connected address ({address}) is not the main Treasury address. Only the owner can resolve disputes.</p>
           </div>
         ) : (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Sve Escrow Transakcije</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">All Escrow Transactions</h2>
               <button 
                 onClick={loadEscrows}
                 className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
               >
-                <RotateCcw size={16} /> Osveži
+                <RotateCcw size={16} /> Refresh
               </button>
             </div>
 
@@ -213,7 +213,7 @@ export default function AdminPage() {
               </div>
             ) : escrows.length === 0 ? (
               <div className="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-sm border border-gray-100 dark:border-gray-700">
-                <p className="text-gray-500 dark:text-gray-400">Nema pronađenih Escrow ugovora na mreži.</p>
+                <p className="text-gray-500 dark:text-gray-400">No escrow contracts found on the network.</p>
               </div>
             ) : (
               <div className="grid gap-4">
@@ -231,13 +231,13 @@ export default function AdminPage() {
                           escrow.state === 3 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                           'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
                         }`}>
-                          {['Created', 'Locked (Aktivno)', 'Disputed (Spor)', 'Released (Završeno)', 'Refunded (Vraćeno)'][escrow.state]}
+                          {['Created', 'Locked (Active)', 'Disputed', 'Released (Completed)', 'Refunded'][escrow.state]}
                         </span>
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
-                        <p><strong className="text-gray-900 dark:text-gray-200">Kupac:</strong> {escrow.buyer}</p>
-                        <p><strong className="text-gray-900 dark:text-gray-200">Prodavac:</strong> {escrow.seller}</p>
-                        <p><strong className="text-gray-900 dark:text-gray-200">Iznos:</strong> ${formatUnits(escrow.amount, 6)} USDC</p>
+                        <p><strong className="text-gray-900 dark:text-gray-200">Buyer:</strong> {escrow.buyer}</p>
+                        <p><strong className="text-gray-900 dark:text-gray-200">Seller:</strong> {escrow.seller}</p>
+                        <p><strong className="text-gray-900 dark:text-gray-200">Amount:</strong> ${formatUnits(escrow.amount, 6)} USDC</p>
                       </div>
                     </div>
 
@@ -249,7 +249,7 @@ export default function AdminPage() {
                           className="flex-1 md:flex-none px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-bold rounded-xl transition-colors disabled:opacity-50 text-sm flex justify-center items-center gap-2"
                         >
                           {processingId === escrow.id ? <Loader2 className="animate-spin" size={16} /> : <RotateCcw size={16} />}
-                          Vrati Kupcu
+                          Refund Buyer
                         </button>
                         <button 
                           onClick={() => handleResolve(escrow.id, false)} // Pay seller
@@ -257,7 +257,7 @@ export default function AdminPage() {
                           className="flex-1 md:flex-none px-4 py-2 bg-celo-green hover:bg-[#2AAB66] text-white font-bold rounded-xl transition-colors disabled:opacity-50 text-sm flex justify-center items-center gap-2"
                         >
                           {processingId === escrow.id ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
-                          Isplati Prodavcu
+                          Pay Seller
                         </button>
                       </div>
                     )}
