@@ -5,16 +5,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   // Configure for Render deployment
-  serverExternalPackages: ['@prisma/client'],
-  // Handle API routes properly
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: '/api/:path*',
-      },
-    ];
-  },
+  output: 'standalone',
 };
 
 export default nextConfig;
