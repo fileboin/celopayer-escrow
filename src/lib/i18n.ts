@@ -70,7 +70,10 @@ export const translations = {
     paymentCompleted: 'Payment Completed',
     ratingThankYou: 'Thank you for your feedback!',
     payInstant: 'Pay Instant',
-    payEscrow: 'Pay Escrow'
+    payEscrow: 'Pay Escrow',
+    success: 'Success!',
+    disconnect: 'Disconnect',
+    changeLanguage: 'Change Language'
   },
   sr: {
     title: 'Celopayer',
@@ -143,7 +146,10 @@ export const translations = {
     paymentCompleted: 'Uplata Završena',
     ratingThankYou: 'Hvala na povratnim informacijama!',
     payInstant: 'Plati Instant',
-    payEscrow: 'Plati Escrow'
+    payEscrow: 'Plati Escrow',
+    success: 'Uspeh!',
+    disconnect: 'Odspoji',
+    changeLanguage: 'Promeni jezik'
   },
   es: {
     title: 'Celopayer',
@@ -170,7 +176,7 @@ export const translations = {
     successDesc: 'Su transacción ha sido confirmada con éxito en la red.',
     viewCeloScan: 'Ver en CeloScan',
     newPayment: 'Nuevo Pago',
-    invalidAddress: '¡Dirección de billetera no válida! Ingrese una dirección válida que comience con 0x y tenga 42 caracteres.',
+    invalidAddress: '¡Dirección de billetera no válida!',
     invalidAmount: 'Por favor ingrese un monto mayor a 0.',
     apprUsdc: 'Aprobando USDC...',
     waitAppr: 'Esperando confirmación de aprobación...',
@@ -207,13 +213,16 @@ export const translations = {
     noHistory: 'No hay historial aún.',
     address: 'Dirección',
     selectToken: 'Seleccionar Moneda',
-    nonCustodialNote: 'Celopayer es un sistema sin custodia. No retenemos sus fondos; están asegurados por el contrato inteligente en la cadena de bloques Celo.',
+    nonCustodialNote: 'Celopayer es un sistema sin custodia.',
     rateTransaction: 'Calificar esta transacción',
     escrowStarted: 'Fideicomiso Iniciado',
     paymentCompleted: 'Pago Completado',
     ratingThankYou: '¡Gracias por sus comentarios!',
     payInstant: 'Pagar Instantáneo',
-    payEscrow: 'Pagar Fideicomiso'
+    payEscrow: 'Pagar Fideicomiso',
+    success: '¡Éxito!',
+    disconnect: 'Desconectar',
+    changeLanguage: 'Cambiar idioma'
   },
   fr: {
     title: 'Celopayer',
@@ -233,18 +242,18 @@ export const translations = {
     total: 'Total',
     scanToPay: 'Scanner pour Payer',
     copied: 'Copié!',
-    copyAddress: 'Copier l\'Adresse',
+    copyAddress: "Copier l'Adresse",
     payWith: 'Payer avec Web3',
     processing: 'Traitement...',
     paymentSuccess: 'Paiement Réussi!',
     successDesc: 'Votre transaction a été confirmée avec succès sur le réseau.',
     viewCeloScan: 'Voir sur CeloScan',
     newPayment: 'Nouveau Paiement',
-    invalidAddress: 'Adresse de portefeuille invalide! Veuillez entrer une adresse valide commençant par 0x et contenant 42 caractères.',
+    invalidAddress: 'Adresse de portefeuille invalide!',
     invalidAmount: 'Veuillez entrer un montant supérieur à 0.',
     apprUsdc: 'Approbation USDC...',
-    waitAppr: 'En attente de confirmation d\'approbation...',
-    errAppr: 'La transaction d\'approbation a échoué sur la blockchain.',
+    waitAppr: "En attente de confirmation d'approbation...",
+    errAppr: "La transaction d'approbation a échoué sur la blockchain.",
     creatEscrow: 'Création de la Fiducie...',
     waitEscrow: 'En attente de confirmation de la fiducie...',
     errEscrow: 'La création de la fiducie a échoué sur la blockchain.',
@@ -274,16 +283,19 @@ export const translations = {
     save: 'Enregistrer',
     receipt: 'Reçu',
     downloadReceipt: 'Télécharger le reçu',
-    noHistory: 'Pas d\'historique pour le moment.',
+    noHistory: "Pas d'historique pour le moment.",
     address: 'Adresse',
     selectToken: 'Sélectionner la devise',
-    nonCustodialNote: 'Celopayer est non-custodial. Nous ne détenons pas vos fonds ; ils sont sécurisés par le contrat intelligent sur la blockchain Celo.',
+    nonCustodialNote: 'Celopayer est non-custodial.',
     rateTransaction: 'Évaluer cette transaction',
     escrowStarted: 'Escrow Démarré',
     paymentCompleted: 'Paiement Terminé',
     ratingThankYou: 'Merci pour votre avis !',
     payInstant: 'Payer Instantané',
-    payEscrow: 'Payer Fiducie'
+    payEscrow: 'Payer Fiducie',
+    success: 'Succès !',
+    disconnect: 'Déconnecter',
+    changeLanguage: 'Changer de langue'
   }
 }
 
